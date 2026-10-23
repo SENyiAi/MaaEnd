@@ -297,6 +297,22 @@
         "post_delay": 0,
         "rate_limit": 0,
         "next": [
+            "AutoDeliveryReturnFromDijiang",
+            "AutoDeliveryNavigateDestination"
+        ]
+    },
+    "AutoDeliveryReturnFromDijiang": {
+        "desc": "残留送货从帝江号恢复时，先进入目的地区；传送场景由终点解析注入",
+        "recognition": "And",
+        "all_of": [
+            "InDijiangWorld"
+        ],
+        "pre_delay": 0,
+        "action": "Custom",
+        "custom_action": "FalseAction",
+        "post_delay": 0,
+        "rate_limit": 0,
+        "next": [
             "AutoDeliveryNavigateDestination"
         ]
     },

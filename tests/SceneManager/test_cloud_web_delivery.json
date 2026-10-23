@@ -1,0 +1,21 @@
+{
+    "configs": {
+        "name": "云视频送货帝江号恢复判定",
+        "resource": "官服",
+        "controller": "Win32-CloudWeb"
+    },
+    "cases": [
+        {
+            "image": "云终末地_帝江号送货恢复.png",
+            "hits": ["AutoDeliveryReturnFromDijiang"]
+        },
+        {
+            "image": "云终末地_大世界.png",
+            "hits": []
+        },
+        {
+            "image": "云终末地_菜单总列表.png",
+            "hits": []
+        }
+    ]
+}

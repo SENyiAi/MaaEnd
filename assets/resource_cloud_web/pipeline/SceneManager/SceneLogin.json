@@ -1,0 +1,8 @@
+{
+    "__ScenePrivateLogin": {
+        "recognition": {
+            "type": "And",
+            "param": {"all_of": ["__ScenePrivateLoginContinue"]}
+        }
+    }
+}

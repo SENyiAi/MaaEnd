@@ -182,6 +182,26 @@ func buildDestinationNavigationOverride(dest destination, zip bool) map[string]a
 			"enabled": false,
 		},
 	}
+	// A resumed job may be opened from Dijiang rather than its field region.
+	// Pipeline checks that scene before running this existing teleport flow;
+	// jobs already in the field keep their current position and navigation.
+	resume := map[string]any{
+		"custom_action":       "FalseAction",
+		"custom_action_param": map[string]any{},
+	}
+	scene := map[string]string{
+		"map01": "SceneEnterWorldValleyIVTheHubHubBase",
+		"map02": "SceneEnterWorldWulingWulingCityTianjingCourtyard",
+	}[dest.Map]
+	if scene != "" {
+		resume["custom_action"] = "SubTask"
+		resume["custom_action_param"] = map[string]any{
+			"sub":      []string{scene},
+			"continue": false,
+			"strict":   true,
+		}
+	}
+	override["AutoDeliveryReturnFromDijiang"] = resume
 	if dest.RetryRouteNode != "" {
 		override[retryNavigateDestinationNode] = map[string]any{
 			"enabled":       true,
