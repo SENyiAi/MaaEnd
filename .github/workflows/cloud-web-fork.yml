@@ -1,0 +1,144 @@
+name: Windows Cloud Web GUI (fork)
+
+on:
+  push:
+    branches:
+      - feat/cloud-webview-ci
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloud-web-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MAAFW_VERSION: v5.14.3
+  MXU_REPOSITORY: SENyiAi/MXU
+  MXU_COMMIT: c8d9392c33ea24b67aff8d087253e61656db7ffd
+  PACKAGE_VERSION: v2.35.0-rc.1-cloudweb-ci.${{ github.run_number }}
+
+jobs:
+  resources:
+    if: github.repository == 'SENyiAi/MaaEnd'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: astral-sh/setup-uv@v10.3.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm test
+      - run: node --test agent/cpp-algo/cloud-webview/tests/*.test.mjs
+      - run: uv run tools/validate_schema.py --resource-dirs assets/resource assets/resource_cloud_web --exclude-dirs assets/resource/gamedata assets/resource/image assets/resource/model --task-dirs assets/tasks
+      - uses: actions/upload-artifact@v6
+        if: failure()
+        with:
+          name: cloud-web-recognition-logs
+          path: tests/maatools
+          retention-days: 7
+
+  windows-gui:
+    if: github.repository == 'SENyiAi/MaaEnd'
+    runs-on: windows-latest
+    timeout-minutes: 90
+    env:
+      CMAKE_BUILD_PARALLEL_LEVEL: 4
+      PYTHONIOENCODING: utf-8
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+          persist-credentials: false
+      - name: Checkout the matching MXU source
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ env.MXU_REPOSITORY }}
+          ref: ${{ env.MXU_COMMIT }}
+          path: cloud-mxu
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: cloud-mxu/pnpm-lock.yaml
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: cloud-mxu/src-tauri -> target
+          shared-key: cloud-web-win-x64
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: agent/go-service/go.mod
+          cache-dependency-path: agent/go-service/go.sum
+      - uses: astral-sh/setup-uv@v10.3.0
+      - name: Check the MaaUtils ABI pin
+        shell: bash
+        run: uv run tools/check_maautils_sync.py --maafw-ref "$MAAFW_VERSION"
+      - name: Download the pinned MaaFramework SDK
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download $env:MAAFW_VERSION --repo MaaXYZ/MaaFramework --pattern 'MAA-win-x86_64*.zip' --dir downloads
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $archives = @(Get-ChildItem downloads/MAA-win-x86_64*.zip)
+          if ($archives.Count -ne 1) { throw 'Expected one MaaFramework SDK archive' }
+          Expand-Archive -LiteralPath $archives[0].FullName -DestinationPath deps
+      - uses: actions/cache@v5
+        id: maadeps
+        with:
+          path: agent/cpp-algo/MaaUtils/MaaDeps
+          key: cloud-web-maadeps-win-x64-${{ hashFiles('tools/maadeps-download.py') }}
+      - name: Download MaaDeps
+        if: steps.maadeps.outputs.cache-hit != 'true'
+        run: uv run tools/maadeps-download.py x64-windows
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Setup WebView2 SDK
+        run: uv run -m tools.setup.dep_3rdparty --webview2
+      - name: Test the MXU frontend
+        working-directory: cloud-mxu
+        run: |
+          pnpm install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pnpm test
+          exit $LASTEXITCODE
+      - name: Build the custom MXU client
+        working-directory: cloud-mxu
+        run: pnpm tauri build --no-bundle --target x86_64-pc-windows-msvc
+      - name: Build and install the Windows agents and resources
+        run: uv run -m tools.setup.build_and_install --cpp-algo --ci --os win --arch x86_64 --version $env:PACKAGE_VERSION
+      - name: Install the matching runtime and GUI
+        shell: pwsh
+        run: |
+          Copy-Item deps/bin/* install/maafw -Recurse -Force
+          Copy-Item deps/share/MaaAgentBinary install/maafw -Recurse -Force
+          Copy-Item cloud-mxu/src-tauri/target/x86_64-pc-windows-msvc/release/mxu.exe install/MaaEnd.exe
+          Get-ChildItem install/maafw/MaaNode* -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
+          uv run tools/merge_pipeline.py install
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          uv run tools/fill_interface.py --version $env:PACKAGE_VERSION --interface install/interface.json
+          exit $LASTEXITCODE
+      - name: Audit and package the GUI
+        run: uv run python .github/scripts/package_cloud_web.py
+      - uses: actions/upload-artifact@v6
+        with:
+          name: MaaEnd-CloudWeb-Windows-x64-${{ github.run_number }}
+          path: dist/MaaEnd-CloudWeb-Windows-x64-*.zip
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
