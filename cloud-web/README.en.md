@@ -15,7 +15,7 @@ Pushing changes to this directory or its workflow on `v2` starts a build. A dail
 
 ## Updates and failures
 
-- `upstream.json`: upstream repository, branch, patch base, and dependency versions. The GUI is pinned to the tested v2.8.0 release. Framework follows its latest stable release with a MaaUtils compatibility check.
+- `upstream.json`: upstream repository, branch, patch base, and Framework version. Framework follows its latest stable release with a MaaUtils compatibility check. The GUI reuses the output of `tools.setup.setup_workspace.install_mxu()` from the fetched MaaEnd checkout. Upstream handles version selection, downloading, and version records; this adaptation no longer pins an MXU version or downloads a second copy. Packaging only renames `install/mxu.exe` to `MaaEnd.exe` and records the installed version.
 - `patches/0001-*`: host, input bridge, Agents, and build integration.
 - `patches/0002-*`: controller, task entries, and cloud website resources.
 - `patches/0003-*`: recognition tests and existing developer documentation.

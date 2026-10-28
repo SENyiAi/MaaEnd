@@ -3,7 +3,5 @@
     "ref": "v2",
     "patch_base": "41b969f35c8285a44dca19d974059286d1f17d16",
     "framework_repository": "MaaXYZ/MaaFramework",
-    "framework_ref": "latest",
-    "gui_repository": "MistEO/MXU",
-    "gui_ref": "v2.8.0"
+    "framework_ref": "latest"
 }

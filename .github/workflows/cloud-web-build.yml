@@ -63,27 +63,22 @@ jobs:
               with:
                   node-version: "24"
 
-            - name: Download released Framework and unmodified GUI
+            - name: Download released Framework
               env:
                   GH_TOKEN: ${{ github.token }}
               run: |
                   $config = Get-Content upstream.json -Raw | ConvertFrom-Json
-                  foreach ($component in @("framework", "gui")) {
-                    $repo = $config."${component}_repository"
-                    $ref = $config."${component}_ref"
-                    $arguments = @("release", "view", "--repo", $repo, "--json", "tagName")
-                    if ($ref -ne "latest") { $arguments += $ref }
-                    $release = & gh @arguments | ConvertFrom-Json
-                    if ($LASTEXITCODE) { exit $LASTEXITCODE }
-                    $destination = ".work/downloads/$component"
-                    gh release download $release.tagName --repo $repo --pattern "*win-x86_64*.zip" --dir $destination
-                    if ($LASTEXITCODE) { exit $LASTEXITCODE }
-                    $archives = @(Get-ChildItem $destination -Filter *.zip)
-                    if ($archives.Count -ne 1) { throw "Expected exactly one $component Windows x64 archive" }
-                    $extract = if ($component -eq "framework") { ".work/upstream/deps" } else { ".work/downloads/MXU" }
-                    Expand-Archive -LiteralPath $archives[0].FullName -DestinationPath $extract
-                    "${component}_tag=$($release.tagName)" >> $env:GITHUB_ENV
-                  }
+                  $arguments = @("release", "view", "--repo", $config.framework_repository, "--json", "tagName")
+                  if ($config.framework_ref -ne "latest") { $arguments += $config.framework_ref }
+                  $release = & gh @arguments | ConvertFrom-Json
+                  if ($LASTEXITCODE) { exit $LASTEXITCODE }
+                  $destination = ".work/downloads/framework"
+                  gh release download $release.tagName --repo $config.framework_repository --pattern "*win-x86_64*.zip" --dir $destination
+                  if ($LASTEXITCODE) { exit $LASTEXITCODE }
+                  $archives = @(Get-ChildItem $destination -Filter *.zip)
+                  if ($archives.Count -ne 1) { throw "Expected exactly one Framework Windows x64 archive" }
+                  Expand-Archive -LiteralPath $archives[0].FullName -DestinationPath .work/upstream/deps
+                  "framework_tag=$($release.tagName)" >> $env:GITHUB_ENV
 
             - name: Verify dependency compatibility
               working-directory: cloud-web/.work/upstream
@@ -95,6 +90,23 @@ jobs:
                   uv run --frozen tools/maadeps-download.py x64-windows
                   if ($LASTEXITCODE) { exit $LASTEXITCODE }
                   uv run --frozen -m tools.setup.dep_3rdparty --webview2
+
+            - name: Install GUI using upstream MaaEnd setup
+              working-directory: cloud-web/.work/upstream
+              env:
+                  GITHUB_TOKEN: ${{ github.token }}
+              run: |
+                  @'
+                  from tools.setup import setup_workspace as setup
+
+                  setup.init_local()
+                  install = setup.PROJECT_BASE / "install"
+                  versions = setup.read_versions_file(install / setup.VERSION_FILE_NAME)
+                  ok, version, _ = setup.install_mxu(install, local_version=versions.get("mxu"))
+                  if not ok or not version:
+                      raise SystemExit("Upstream MaaEnd MXU installation failed or returned no version")
+                  print(f"Using upstream-installed MXU: {version}")
+                  '@ | uv run --frozen python -
 
             - name: Run page, installer and recognition tests
               working-directory: cloud-web/.work/upstream
@@ -121,7 +133,7 @@ jobs:
             - name: Assemble clean GUI package
               env:
                   DISTRIBUTION_REPOSITORY: ${{ github.repository }}
-              run: python scripts/package.py --repository "$env:DISTRIBUTION_REPOSITORY" --framework-tag "$env:framework_tag" --gui-tag "$env:gui_tag"
+              run: python scripts/package.py --repository "$env:DISTRIBUTION_REPOSITORY" --framework-tag "$env:framework_tag"
 
             - name: Upload GUI package
               uses: actions/upload-artifact@v6

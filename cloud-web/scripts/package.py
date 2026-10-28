@@ -29,7 +29,7 @@ def digest(path: Path) -> str:
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
-def package(workdir: Path, repository: str, framework_tag: str, gui_tag: str, output: Path) -> Path:
+def package(workdir: Path, repository: str, framework_tag: str, output: Path) -> Path:
     if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
         raise ValueError("Repository must be owner/name")
     if repository.lower() == "maaend/maaend":
@@ -43,21 +43,29 @@ def package(workdir: Path, repository: str, framework_tag: str, gui_tag: str, ou
     install = upstream / "install"
     if (install / "MaaEnd.exe").exists():
         raise ValueError("Install directory already contains a GUI; use fresh CI build outputs")
+    # Consume MaaEnd's own installer output and its version record, without downloading a second GUI.
+    gui = install / "mxu.exe"
+    if not gui.is_file():
+        raise ValueError("Missing upstream-installed MXU; run MaaEnd's install_mxu first")
+    versions = json.loads((install / "version.json").read_text(encoding="utf-8"))["versions"]
+    gui_tag = versions.get("mxu")
+    if not isinstance(gui_tag, str) or not gui_tag.strip():
+        raise ValueError("Missing upstream-installed MXU version")
     shutil.copytree(upstream / "deps" / "bin", install / "maafw", dirs_exist_ok=True)
     shutil.copytree(upstream / "deps" / "share" / "MaaAgentBinary", install / "maafw" / "MaaAgentBinary")
     # MXU remains the released, unmodified binary; only the distribution name changes.
-    shutil.copy2(workdir / "downloads" / "MXU" / "mxu.exe", install / "MaaEnd.exe")
+    gui.rename(install / "MaaEnd.exe")
     shutil.copy2(ROOT / "LICENSE", install / "CLOUD-ADAPTATION-LICENSE.txt")
     shutil.copy2(ROOT / "NOTICE.md", install / "CLOUD-ADAPTATION-NOTICE.md")
     (install / "Start-CPU-mode.cmd").write_bytes(
         b'@echo off\r\nset MAAEND_CLOUD_SOFTWARE_RENDERING=1\r\nstart "" "%~dp0MaaEnd.exe"\r\n'
     )
-    for source, name in ((workdir / "downloads" / "MXU", "MXU"), (upstream / "deps", "MaaFramework")):
-        for license_name in ("LICENSE", "LICENSE.md"):
-            if (source / license_name).is_file():
-                target = install / "third-party" / name
-                target.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(source / license_name, target / license_name)
+    for license_name in ("LICENSE", "LICENSE.md"):
+        source = upstream / "deps" / license_name
+        if source.is_file():
+            target = install / "third-party" / "MaaFramework"
+            target.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, target / license_name)
     subprocess.run(["uv", "run", "--frozen", "tools/merge_pipeline.py", "install"], cwd=upstream, check=True)
     version = f"v0.1.0-cloud.{report['commit'][:8]}"
     subprocess.run(
@@ -115,7 +123,6 @@ if __name__ == "__main__":
     parser.add_argument("--workdir", type=Path, default=ROOT / ".work")
     parser.add_argument("--repository", required=True)
     parser.add_argument("--framework-tag", required=True)
-    parser.add_argument("--gui-tag", required=True)
     parser.add_argument("--output", type=Path, default=ROOT / "dist")
     args = parser.parse_args()
-    print(package(args.workdir.resolve(), args.repository, args.framework_tag, args.gui_tag, args.output.resolve()))
+    print(package(args.workdir.resolve(), args.repository, args.framework_tag, args.output.resolve()))

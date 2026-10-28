@@ -15,7 +15,7 @@
 
 ## 更新与故障处理
 
-- `upstream.json`：上游仓库、分支、补丁基准、Framework 和 GUI 版本。GUI 暂时固定已验证的 v2.8.0，Framework 跟随最新正式发布版，并检查 MaaUtils 兼容性。
+- `upstream.json`：上游仓库、分支、补丁基准和 Framework 版本。Framework 跟随最新正式发布版，并检查 MaaUtils 兼容性。GUI 直接复用本次拉取的 MaaEnd `tools.setup.setup_workspace.install_mxu()` 安装结果，版本选择、下载和版本记录由上游脚本负责；不再单独固定 MXU 版本或重复下载。打包时仅将 `install/mxu.exe` 重命名为 `MaaEnd.exe`，并记录实际安装版本。
 - `patches/0001-*`：宿主、输入桥接、Agent 与构建接入。
 - `patches/0002-*`：控制器、任务入口与云网页专属资源。
 - `patches/0003-*`：识别测试与原有开发文档。

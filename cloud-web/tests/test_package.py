@@ -44,14 +44,13 @@ class PackagingTest(unittest.TestCase):
         (deps / "bin" / "MaaFramework.dll").write_bytes(b"framework")
         (deps / "bin" / "MaaWin32ControlUnit.dll").write_bytes(b"control-unit")
         (deps / "share" / "MaaAgentBinary").mkdir(parents=True)
-        gui = self.work / "downloads" / "MXU" / "mxu.exe"
-        gui.parent.mkdir(parents=True)
-        gui.write_bytes(b"unmodified gui")
+        (self.install / "mxu.exe").write_bytes(b"unmodified gui")
+        write_json(self.install / "version.json", {"versions": {"mxu": "upstream-gui-test"}})
         self.enterContext(patch.object(distribution.subprocess, "run"))
         self.enterContext(patch.object(distribution, "git", return_value="b" * 40))
 
     def build(self):
-        return distribution.package(self.work, "example/cloud-fork", "fw-test", "gui-test", self.output)
+        return distribution.package(self.work, "example/cloud-fork", "fw-test", self.output)
 
     def test_package_uses_own_update_source_and_records_versions(self):
         archive = self.build()
@@ -62,9 +61,11 @@ class PackagingTest(unittest.TestCase):
             self.assertNotIn("telemetry", interface)
             self.assertNotIn("welcome", interface)
             self.assertEqual(bundle.read("MaaEnd.exe"), b"unmodified gui")
+            self.assertNotIn("mxu.exe", bundle.namelist())
             provenance = json.loads(bundle.read("cloud-build.json"))
             self.assertEqual(provenance["framework"], "fw-test")
-            self.assertEqual(provenance["gui"], "gui-test")
+            self.assertEqual(provenance["gui"], "upstream-gui-test")
+            self.assertEqual(json.loads(bundle.read("version.json"))["versions"]["mxu"], "upstream-gui-test")
             checksums = json.loads(bundle.read("cloud-files.sha256.json"))
             self.assertIn("agent/cloud-webview.exe", checksums)
         self.assertTrue(archive.with_suffix(".zip.sha256").exists())
@@ -83,7 +84,20 @@ class PackagingTest(unittest.TestCase):
 
     def test_official_update_repository_is_rejected(self):
         with self.assertRaisesRegex(ValueError, "own repository"):
-            distribution.package(self.work, "MaaEnd/MaaEnd", "fw", "gui", self.output)
+            distribution.package(self.work, "MaaEnd/MaaEnd", "fw", self.output)
+
+    def test_missing_upstream_gui_does_not_download_a_replacement(self):
+        (self.install / "mxu.exe").unlink()
+        with self.assertRaisesRegex(ValueError, "Missing upstream-installed MXU"):
+            self.build()
+        distribution.subprocess.run.assert_not_called()
+        self.assertFalse(self.output.exists())
+
+    def test_missing_upstream_gui_version_is_rejected(self):
+        write_json(self.install / "version.json", {"versions": {}})
+        with self.assertRaisesRegex(ValueError, "Missing upstream-installed MXU version"):
+            self.build()
+        self.assertFalse(self.output.exists())
 
 
 if __name__ == "__main__":
