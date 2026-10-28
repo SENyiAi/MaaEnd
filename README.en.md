@@ -1,4 +1,7 @@
 <!-- markdownlint-disable MD033 MD041 -->
+
+> This fork provides a Windows controller for the Endfield cloud website. Run [Build CloudWeb GUI](https://github.com/SENyiAi/MaaEnd/actions/workflows/cloud-web-build.yml) to fetch the latest upstream code and build the GUI. See [cloud-web](./cloud-web/README.en.md) for setup and maintenance.
+
 <p align="center">
   <img alt="LOGO" src="./docs/images/MaaEnd-Tiny-512.png" width="256" height="256" />
 </p>

@@ -1,0 +1,8 @@
+.work/
+dist/
+__pycache__/
+*.pyc
+
+# The upstream Visual Studio rules ignore every Win32 directory.
+!fixtures/Win32/
+!fixtures/Win32/**

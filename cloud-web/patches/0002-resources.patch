@@ -1,0 +1,1220 @@
+diff --git a/assets/interface.json b/assets/interface.json
+index d6af619050c8140b6121066a66e3f018d87c6413..cab22e0bd31bddf7341e06c135bdb87524e2eedb 100644
+--- a/assets/interface.json
++++ b/assets/interface.json
+@@ -37,6 +37,22 @@
+                 "keyboard": "Seize"
+             }
+         },
++        {
++            "name": "Win32-CloudWeb",
++            "label": "$controller.Win32-CloudWeb.label",
++            "description": "$controller.Win32-CloudWeb.description",
++            "type": "Win32",
++            "attach_resource_path": [
++                "./resource_cloud_web"
++            ],
++            "win32": {
++                "class_regex": "^MaaEnd\\.CloudWeb\\.Controller\\.v1$",
++                "window_regex": "^MaaEnd - Cloud Web Controller$",
++                "screencap": "PrintWindow",
++                "mouse": "SendMessage",
++                "keyboard": "SendMessage"
++            }
++        },
+         {
+             "name": "ADB",
+             "label": "$controller.ADB.label",
+@@ -203,6 +219,8 @@
+     "import": [
+         // pretask
+         "tasks/pretasks/LaunchGamePC.json",
++        "tasks/pretasks/LoginCloudWeb.json",
++        "tasks/pretasks/LaunchCloudWeb.json",
+         // group: regional_development
+         "tasks/OutpostTrading.json",
+         "tasks/SeizeDeliveryJobs.json",
+@@ -274,6 +292,7 @@
+         "tasks/AndroidOpenGame.json",
+         "tasks/CloseGame.json",
+         "tasks/CloseGamePC.json",
++        "tasks/CloseCloudWeb.json",
+         // group: realtime
+         "tasks/RealTimeTask.json",
+         // group: backpack
+diff --git a/assets/locales/interface/en_us.json b/assets/locales/interface/en_us.json
+index c040d21fc9ff308a69ffb03ab7a5c5f4a80c53fe..17487028e4e49c6ab1d68b8333e6fdef28dc0d69 100644
+--- a/assets/locales/interface/en_us.json
++++ b/assets/locales/interface/en_us.json
+@@ -14,6 +14,8 @@
+     "controller.MacOS-Background.label": "macOS Background Window (Beta)",
+     "controller.MacOS-Front.description": "Uses ScreenCaptureKit for capture and GlobalEvent for input. Screen Recording and Accessibility permissions are required. Tasks that depend on automatic navigation or relative camera movement are not currently supported.",
+     "controller.MacOS-Front.label": "macOS Foreground Window (Beta)",
++    "controller.Win32-CloudWeb.description": "Runs the official PC web layout in a dedicated WebView with background control. Focus, minimization, and window size can be changed freely. Sign in through the dedicated window on first use.",
++    "controller.Win32-CloudWeb.label": "Cloud Endfield Web (Experimental)",
+     "controller.Win32-Front.description": "Best stability. Requires the game window to remain in the foreground and unobstructed; will fully grab the mouse.",
+     "controller.Win32-Front.label": "PC-Foreground",
+     "controller.Win32-Window-Background.description": "Due to game updates, it can no longer be adapted. The background controller has been deprecated and will be removed in a future version.",
+@@ -1924,7 +1926,9 @@
+     "preset.QuickDaily.label": "Quick Daily",
+     "preset.RealtimeAssist.description": "Full suite of real-time assist features for AFK.",
+     "preset.RealtimeAssist.label": "Real-time Assist",
++    "pretask.LaunchCloudWeb.label": "Log in and Start Cloud Endfield Web",
+     "pretask.LaunchGamePC.label": "🚀 Launch Game (PC)",
++    "pretask.LoginCloudWeb.label": "Log in to Cloud Endfield (removable after login)",
+     "resource.CN.label": "General Resources (currently best supported in Simplified Chinese)",
+     "task.AccountSwitch.description": "Automatically log out and switch to the specified account (match by phone number on CN Server, by email on Global Server)",
+     "task.AccountSwitch.label": "🔑 Auto Account Switch",
+diff --git a/assets/locales/interface/ja_jp.json b/assets/locales/interface/ja_jp.json
+index 4f47cfe926b73c4bf2cf1bdef052b70c44d04ae3..c45f104ca2e7ba7a8d27afb3c7f37a9d2bfc283b 100644
+--- a/assets/locales/interface/ja_jp.json
++++ b/assets/locales/interface/ja_jp.json
+@@ -14,6 +14,8 @@
+     "controller.MacOS-Background.label": "macOS バックグラウンドウィンドウ（ベータ版）",
+     "controller.MacOS-Front.description": "ScreenCaptureKit によるキャプチャと GlobalEvent による入力を使用します。画面収録とアクセシビリティの権限が必要です。自動経路探索または相対視点移動に依存するタスクは現在サポートされていません。",
+     "controller.MacOS-Front.label": "macOS 前面ウィンドウ（ベータ版）",
++    "controller.Win32-CloudWeb.description": "専用 WebView で公式 PC 版を実行し、バックグラウンド制御を使用します。フォーカス、最小化、ウィンドウサイズを自由に変更できます。初回は専用ウィンドウでログインしてください。",
++    "controller.Win32-CloudWeb.label": "クラウド版 Web（試験的）",
+     "controller.Win32-Front.description": "安定性が最も高い。ゲームウィンドウを最前面に表示し、遮られないようにする必要があります。マウスを完全に占有します。",
+     "controller.Win32-Front.label": "PC-前面",
+     "controller.Win32-Window-Background.description": "ゲームの更新により適応を継続できなくなりました。バックグラウンドコントローラーは非推奨となり、今後のバージョンで削除される予定です。",
+@@ -1924,7 +1926,9 @@
+     "preset.QuickDaily.label": "クイックデイリー",
+     "preset.RealtimeAssist.description": "放置時に有効にするリアルタイムアシスト機能のフルセット。",
+     "preset.RealtimeAssist.label": "リアルタイムアシスト",
++    "pretask.LaunchCloudWeb.label": "クラウド Web 版にログインして起動",
+     "pretask.LaunchGamePC.label": "🚀 ゲーム起動（PC）",
++    "pretask.LoginCloudWeb.label": "クラウドエンドフィールドにログイン（ログイン後は削除可能）",
+     "resource.CN.label": "共通リソース（現在は簡体字中国語のみサポートが良好）",
+     "task.AccountSwitch.description": "現在のアカウントからログアウトし、指定アカウントに切り替えます（中国サーバーは電話番号、グローバルサーバーはメールアドレスで照合）",
+     "task.AccountSwitch.label": "🔑自動アカウント切替",
+diff --git a/assets/locales/interface/ko_kr.json b/assets/locales/interface/ko_kr.json
+index e15a799628bcdbf0a402f29f211342c701743f70..1ac570f8e65748e7c1df921a1a648c291c9d947a 100644
+--- a/assets/locales/interface/ko_kr.json
++++ b/assets/locales/interface/ko_kr.json
+@@ -14,6 +14,8 @@
+     "controller.MacOS-Background.label": "macOS 백그라운드 창(베타)",
+     "controller.MacOS-Front.description": "ScreenCaptureKit 캡처와 GlobalEvent 입력을 사용합니다. 화면 기록 및 손쉬운 사용 권한이 필요합니다. 자동 길찾기 또는 상대 시점 이동에 의존하는 작업은 현재 지원되지 않습니다.",
+     "controller.MacOS-Front.label": "macOS 전면 창(베타)",
++    "controller.Win32-CloudWeb.description": "전용 WebView에서 공식 PC 웹 버전을 실행하고 백그라운드 컨트롤러를 사용합니다. 포커스, 최소화 및 창 크기를 자유롭게 변경할 수 있습니다. 처음 사용할 때 전용 창에서 로그인하세요.",
++    "controller.Win32-CloudWeb.label": "클라우드 웹 (실험적)",
+     "controller.Win32-Front.description": "안정성이 가장 뛰어납니다. 게임 창이 항상 최앞단에 있고 가려지지 않아야 하며, 마우스를 완전히 점유합니다.",
+     "controller.Win32-Front.label": "PC-포그라운드",
+     "controller.Win32-Window-Background.description": "게임 업데이트로 인해 더 이상 호환할 수 없습니다. 백그라운드 컨트롤러는 사용 중단되었으며 향후 버전에서 제거될 예정입니다.",
+@@ -1924,7 +1926,9 @@
+     "preset.QuickDaily.label": "빠른 일일 임무",
+     "preset.RealtimeAssist.description": "방치 시 활성화하는 실시간 어시스트 기능 풀세트입니다.",
+     "preset.RealtimeAssist.label": "실시간 어시스트",
++    "pretask.LaunchCloudWeb.label": "클라우드 웹 버전 로그인 및 시작",
+     "pretask.LaunchGamePC.label": "🚀 게임 실행 (PC)",
++    "pretask.LoginCloudWeb.label": "클라우드 엔드필드 로그인 (로그인 후 제거 가능)",
+     "resource.CN.label": "공통 리소스 (현재 간체 중국어만 잘 지원됨)",
+     "task.AccountSwitch.description": "현재 계정에서 로그아웃하고 지정한 계정으로 전환합니다(중국 서버는 전화번호, 글로벌 서버는 이메일로 매칭)",
+     "task.AccountSwitch.label": "🔑자동 계정 전환",
+diff --git a/assets/locales/interface/zh_cn.json b/assets/locales/interface/zh_cn.json
+index 273c56b707c878c07d1ca2929fc83bf3cbf20d3e..0d06ff1ccd332e9d7499422a1ebcd78f983da461 100644
+--- a/assets/locales/interface/zh_cn.json
++++ b/assets/locales/interface/zh_cn.json
+@@ -14,6 +14,8 @@
+     "controller.MacOS-Background.label": "macOS 后台窗口（测试版）",
+     "controller.MacOS-Front.description": "使用 ScreenCaptureKit 截图和 GlobalEvent 输入。需要授予屏幕录制与辅助功能权限。暂不支持依赖自动寻路或相对视角移动的任务。",
+     "controller.MacOS-Front.label": "macOS 前台窗口（测试版）",
++    "controller.Win32-CloudWeb.description": "使用专用 WebView 运行官网 PC 版，通过后台控制器操作；可自由切换焦点、最小化和调整窗口。首次使用请在专用窗口中登录。",
++    "controller.Win32-CloudWeb.label": "云终末地网页版（实验性）",
+     "controller.Win32-Front.description": "稳定性最好，需要游戏窗口保持在最前且不被遮挡，会完全抢占鼠标",
+     "controller.Win32-Front.label": "电脑端-前台",
+     "controller.Win32-Window-Background.description": "因游戏更新导致无法继续适配，后台控制器已弃用，并将在后续版本中移除。",
+@@ -1924,7 +1926,9 @@
+     "preset.QuickDaily.label": "快速日常",
+     "preset.RealtimeAssist.description": "挂机时开启的实时辅助功能全套",
+     "preset.RealtimeAssist.label": "实时辅助",
++    "pretask.LaunchCloudWeb.label": "登录并启动云终末地网页版",
+     "pretask.LaunchGamePC.label": "🚀启动游戏（PC）",
++    "pretask.LoginCloudWeb.label": "登录云终末地（登录后可移除）",
+     "resource.CN.label": "通用资源（目前仅简中支持较好）",
+     "task.AccountSwitch.description": "自动登出当前账号并切换到指定账号（国服按手机号、国际服按邮箱匹配）",
+     "task.AccountSwitch.label": "🔑自动切换账号",
+diff --git a/assets/locales/interface/zh_tw.json b/assets/locales/interface/zh_tw.json
+index 4a760876b6c9134588ee208b991a29054348a731..0103f01713ccd9a330721b0ae8a7c3428e318a44 100644
+--- a/assets/locales/interface/zh_tw.json
++++ b/assets/locales/interface/zh_tw.json
+@@ -14,6 +14,8 @@
+     "controller.MacOS-Background.label": "macOS 背景視窗（測試版）",
+     "controller.MacOS-Front.description": "使用 ScreenCaptureKit 截圖和 GlobalEvent 輸入。需要授予螢幕錄製與輔助使用權限。暫不支援依賴自動尋路或相對視角移動的任務。",
+     "controller.MacOS-Front.label": "macOS 前景視窗（測試版）",
++    "controller.Win32-CloudWeb.description": "使用專用 WebView 執行官網 PC 版，透過背景控制器操作；可自由切換焦點、最小化和調整視窗。首次使用請在專用視窗中登入。",
++    "controller.Win32-CloudWeb.label": "雲終末地網頁版（實驗性）",
+     "controller.Win32-Front.description": "穩定性最好，需要遊戲視窗保持在最前且不被遮擋，會完全搶占滑鼠",
+     "controller.Win32-Front.label": "電腦端-前台",
+     "controller.Win32-Window-Background.description": "因遊戲更新導致無法繼續適配，後台控制器已棄用，並將在後續版本中移除。",
+@@ -1924,7 +1926,9 @@
+     "preset.QuickDaily.label": "快速日常",
+     "preset.RealtimeAssist.description": "掛機時開啟的實時輔助功能全套",
+     "preset.RealtimeAssist.label": "實時輔助",
++    "pretask.LaunchCloudWeb.label": "登入並啟動雲終末地網頁版",
+     "pretask.LaunchGamePC.label": "🚀啟動遊戲（PC）",
++    "pretask.LoginCloudWeb.label": "登入雲終末地（登入後可移除）",
+     "resource.CN.label": "通用資源（目前僅簡中支援較好）",
+     "task.AccountSwitch.description": "自動登出目前帳號並切換到指定帳號（國服按手機號、國際服按電子郵件匹配）",
+     "task.AccountSwitch.label": "🔑自動切換帳號",
+diff --git a/assets/resource/pipeline/CloseCloudWeb.json b/assets/resource/pipeline/CloseCloudWeb.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..7001b355bbbf5cf2c84783efe28fa69d52b69b8c
+--- /dev/null
++++ b/assets/resource/pipeline/CloseCloudWeb.json
+@@ -0,0 +1,7 @@
++{
++    "CloseCloudWeb": {
++        "recognition": "DirectHit",
++        "action": "Custom",
++        "custom_action": "CloseCloudWeb"
++    }
++}
+diff --git a/assets/resource_cloud_web/pipeline/AutoSell/Recognition.json b/assets/resource_cloud_web/pipeline/AutoSell/Recognition.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..14dd81bcb978c26d6153e18b618a960e52cf31e1
+--- /dev/null
++++ b/assets/resource_cloud_web/pipeline/AutoSell/Recognition.json
+@@ -0,0 +1,25 @@
++{
++    // 云视频黄色竖条的蓝色通道为 11~15，保留 PC 的区域与连通面积限制。
++    "AutoSellFriendsPricesExpectedGoToHighlightRecognition": {
++        "upper": [
++            255,
++            248,
++            40
++        ]
++    },
++    "AutoSellFriendsPriceCurrentAreaRecognition": {
++        "upper": [
++            255,
++            248,
++            40
++        ]
++    },
++    "AutoSellStockRedistributionItemGreenLineRecognition": {
++        // 云视频缩放后绿线边缘混入背景色，保留原连通面积要求。
++        "upper": [
++            200,
++            220,
++            125
++        ]
++    }
++}
+diff --git a/assets/resource_cloud_web/pipeline/Common/ButtonColor.json b/assets/resource_cloud_web/pipeline/Common/ButtonColor.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..b624dd76896adae1d1d68a2b66ed8bbf480050e0
+--- /dev/null
++++ b/assets/resource_cloud_web/pipeline/Common/ButtonColor.json
+@@ -0,0 +1,19 @@
++{
++    "YellowButtonBackground": {
++        "recognition": {
++            "type": "ColorMatch",
++            "param": {
++                "lower": [
++                    28,
++                    100,
++                    100
++                ],
++                "upper": [
++                    31,
++                    255,
++                    255
++                ]
++            }
++        }
++    }
++}
+diff --git a/assets/resource_cloud_web/pipeline/Common/CharacterController.json b/assets/resource_cloud_web/pipeline/Common/CharacterController.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..66c508cb3a912ce483beb7c95d44b06e835a133c
+--- /dev/null
++++ b/assets/resource_cloud_web/pipeline/Common/CharacterController.json
+@@ -0,0 +1,19 @@
++{
++    "__CharacterControllerDeltaSwipeAction": {
++        "action": "Custom",
++        "custom_action": "CloudRelativeMove",
++        "custom_action_param": {"dx": 0, "dy": 0}
++    },
++    "__CharacterControllerDeltaClickCenterAction": {
++        "action": "DoNothing"
++    },
++    "__CharacterControllerDeltaAltKeyDownAction": {
++        "action": "DoNothing"
++    },
++    "__CharacterControllerDeltaAltKeyUpAction": {
++        "action": "DoNothing"
++    },
++    "MapNavigatorZiplinePitchReset": {
++        "custom_action": "CloudRelativeMove"
++    }
++}
+diff --git a/assets/resource_cloud_web/pipeline/Common/TeleportButton.json b/assets/resource_cloud_web/pipeline/Common/TeleportButton.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..61dfd6655d1bef03b3c24fd66618add9ca733fa7
+--- /dev/null
++++ b/assets/resource_cloud_web/pipeline/Common/TeleportButton.json
+@@ -0,0 +1,17 @@
++{
++    // 云串流中的圆环图标易受压缩与网络状态浮层影响，保留地图锚点并识别完整按钮文字。
++    "__TeleportButton": {
++        "recognition": {
++            "type": "OCR",
++            "param": {
++                "roi": [
++                    1140,
++                    640,
++                    70,
++                    45
++                ],
++                "expected": ["传送"]
++            }
++        }
++    }
++}
+diff --git a/assets/resource_cloud_web/pipeline/DijiangRewards/GrowthChamber.json b/assets/resource_cloud_web/pipeline/DijiangRewards/GrowthChamber.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..92d994f1b0777b2514a0d3c57ae2d3f63820d4d6
+--- /dev/null
++++ b/assets/resource_cloud_web/pipeline/DijiangRewards/GrowthChamber.json
+@@ -0,0 +1,10 @@
++{
++    "GrowthChamberBackButton": {
++        "recognition": {
++            "type": "And",
++            "param": {
++                "all_of": ["BackButton"]
++            }
++        }
++    }
++}
+diff --git a/assets/resource_cloud_web/pipeline/IMS/AddItemData.json b/assets/resource_cloud_web/pipeline/IMS/AddItemData.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..b475dcd5d04e4e8e3af10937a608b0437a84add7
+--- /dev/null
++++ b/assets/resource_cloud_web/pipeline/IMS/AddItemData.json
+@@ -0,0 +1,16 @@
++{
++    "IMSA3MouseMoveReset": {
++        "desc": "云网页：将游戏指针移到视频下边缘，避开官网左上角悬浮菜单及奖励图标",
++        "action": {
++            "type": "TouchMove",
++            "param": {
++                "target": [
++                    640,
++                    719,
++                    1,
++                    1
++                ]
++            }
++        }
++    }
++}
+diff --git a/assets/resource_cloud_web/pipeline/Interface/InScene/Region.json b/assets/resource_cloud_web/pipeline/Interface/InScene/Region.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..fb6148cbb2643967971c0aa9f76b2f31fe011b81
+--- /dev/null
++++ b/assets/resource_cloud_web/pipeline/Interface/InScene/Region.json
+@@ -0,0 +1,10 @@
++{
++    "InMenuList": {
++        "recognition": "And",
++        "all_of": [
++            "CheckMenuListText",
++            "CheckMenuListText2",
++            "__ScenePrivateMenuListLoadingEnterWorld"
++        ]
++    }
++}
+diff --git a/assets/resource_cloud_web/pipeline/Interface/MouseMoveReset.json b/assets/resource_cloud_web/pipeline/Interface/MouseMoveReset.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..a8ae3ca22d42815b9c5c014d54ceb777f441d396
+--- /dev/null
++++ b/assets/resource_cloud_web/pipeline/Interface/MouseMoveReset.json
+@@ -0,0 +1,16 @@
++{
++    "MouseMoveReset": {
++        "desc": "云网页：将游戏指针移到视频下边缘，避开官网左上角悬浮菜单及奖励图标",
++        "action": {
++            "type": "TouchMove",
++            "param": {
++                "target": [
++                    640,
++                    719,
++                    1,
++                    1
++                ]
++            }
++        }
++    }
++}
+diff --git a/assets/resource_cloud_web/pipeline/Interface/Scene.json b/assets/resource_cloud_web/pipeline/Interface/Scene.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..cc612d897fb62d56f1b7a1bd41663b44ec0ebae3
+--- /dev/null
++++ b/assets/resource_cloud_web/pipeline/Interface/Scene.json
+@@ -0,0 +1,24 @@
++{
++    "SceneAnyEnterWorld": {
++        "next": [
++            "[JumpBack]__ScenePrivateCloudWebReconnect",
++            "__ScenePrivateCloseADBExit",
++            "__ScenePrivateMenuListLoadingEnterWorld",
++            "__ScenePrivateMenuListEnterWorld",
++            "__ScenePrivateTrialOfSwordmancyEnterWorld",
++            "__ScenePrivateAnyEnterWorldSuccess",
++            "[JumpBack]__ScenePrivateCloudWebStartGame",
++            "[JumpBack]__ScenePrivateLogin",
++            "[JumpBack]SceneNoticeRewardsUpgrade",
++            "[JumpBack]SceneNoticeRewardsConfirm",
++            "[JumpBack]__ScenePrivateLoginMonthlyPassConfirm",
++            "[JumpBack]__ScenePrivateWorldSpaceExit",
++            "[JumpBack]__ScenePrivateWorldStorySkip",
++            "[JumpBack]__ScenePrivateLoggedOutConfirm",
++            "[JumpBack]SceneWaitLoadingExit",
++            "[JumpBack]__ScenePrivateCloudWebProtocolPrepareExit",
++            "[JumpBack]__ScenePrivateScreenshotStableAbnormal",
++            "[JumpBack]__ScenePrivateAnyExit"
++        ]
++    }
++}
+diff --git a/assets/resource_cloud_web/pipeline/OutpostTrading/SellCore.json b/assets/resource_cloud_web/pipeline/OutpostTrading/SellCore.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..5590280104c9370000f4823a147b938e6b1ad243
+--- /dev/null
++++ b/assets/resource_cloud_web/pipeline/OutpostTrading/SellCore.json
+@@ -0,0 +1,18 @@
++{
++    "OutpostTradingSell": {
++        "target_offset": [
++            -60,
++            0,
++            0,
++            0
++        ]
++    },
++    "OutpostTradingSellThenLoop": {
++        "target_offset": [
++            -60,
++            0,
++            0,
++            0
++        ]
++    }
++}
+diff --git a/assets/resource_cloud_web/pipeline/ProtocolSpace/InSpace.json b/assets/resource_cloud_web/pipeline/ProtocolSpace/InSpace.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..227ee525aa77969600e15b5db22a548c3c6452ed
+--- /dev/null
++++ b/assets/resource_cloud_web/pipeline/ProtocolSpace/InSpace.json
+@@ -0,0 +1,113 @@
++{
++    "ProtocolSpaceEnterSpaceText": {
++        "roi": [
++            1050,
++            640,
++            170,
++            40
++        ],
++        "expected": ["进入协议空间"]
++    },
++    "ProtocolSpaceEnterSpaceConfirm": {
++        "next": [
++            "[JumpBack]ProtocolSpaceCloudWebMechanicsClose",
++            "[JumpBack]SceneWaitLoadingExit",
++            "ProtocolSpaceEnterSpaceSuccess"
++        ]
++    },
++    "ProtocolSpaceCloudWebMechanicsClose": {
++        "recognition": {
++            "type": "And",
++            "param": {
++                "all_of": [
++                    {
++                        "recognition": {
++                            "type": "OCR",
++                            "param": {
++                                "roi": [
++                                    550,
++                                    210,
++                                    180,
++                                    45
++                                ],
++                                "expected": ["机制特性"]
++                            }
++                        }
++                    },
++                    {
++                        "recognition": {
++                            "type": "TemplateMatch",
++                            "param": {
++                                "roi": [
++                                    1070,
++                                    210,
++                                    60,
++                                    50
++                                ],
++                                "template": "Common/Button/CloseButtonType4.png"
++                            }
++                        }
++                    }
++                ],
++                "box_index": 1
++            }
++        },
++        "pre_delay": 0,
++        "action": "Click",
++        "post_delay": 0,
++        "rate_limit": 0
++    },
++    "ProtocolSpaceRewardClaimSuccessContinue": {
++        "all_of": [
++            "ProtocolSpaceRewardClaimSuccess",
++            {
++                "recognition": {
++                    "type": "OCR",
++                    "param": {
++                        "roi": [
++                            360,
++                            590,
++                            230,
++                            60
++                        ],
++                        "expected": ["重新挑战"]
++                    }
++                }
++            }
++        ],
++        "box_index": 1
++    },
++    "ProtocolSpaceRewardClaimSuccessContinueAfterMedication": {
++        "all_of": ["ProtocolSpaceRewardClaimSuccessContinue"]
++    },
++    "ProtocolSpaceRewardClaimSuccessSanityLowFinish": {
++        "all_of": ["ProtocolSpaceRewardClaimSuccessFinish"],
++        "box_index": 0
++    },
++    "ProtocolSpaceRewardClaimSuccessFinish": {
++        "all_of": [
++            "ProtocolSpaceRewardClaimSuccess",
++            {
++                "recognition": {
++                    "type": "OCR",
++                    "param": {
++                        "roi": [
++                            700,
++                            590,
++                            220,
++                            60
++                        ],
++                        "expected": ["离开"]
++                    }
++                }
++            }
++        ],
++        "box_index": 1
++    },
++    "ProtocolSpaceEnterSpace": {
++        "all_of": [
++            "ProtocolSpaceNormalPrepareEnter",
++            "ProtocolSpaceEnterSpaceText"
++        ]
++    }
++}
+diff --git a/assets/resource_cloud_web/pipeline/SceneManager/SceneCloudWeb.json b/assets/resource_cloud_web/pipeline/SceneManager/SceneCloudWeb.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..d59d4f12de10ef7523d05015491c59eae5eac25d
+--- /dev/null
++++ b/assets/resource_cloud_web/pipeline/SceneManager/SceneCloudWeb.json
+@@ -0,0 +1,63 @@
++{
++    "__ScenePrivateCloudWebStartButton": {
++        "recognition": {
++            "type": "OCR",
++            "param": {
++                "roi": [
++                    1044,
++                    570,
++                    121,
++                    48
++                ],
++                "expected": ["开始游戏"]
++            }
++        },
++        "pre_delay": 0,
++        "post_delay": 0,
++        "rate_limit": 0
++    },
++    "__ScenePrivateCloudWebHeader": {
++        "recognition": {
++            "type": "OCR",
++            "param": {
++                "roi": [
++                    1136,
++                    16,
++                    102,
++                    39
++                ],
++                "expected": ["用户中心"]
++            }
++        },
++        "pre_delay": 0,
++        "post_delay": 0,
++        "rate_limit": 0
++    },
++    "__ScenePrivateCloudWebStartGame": {
++        "recognition": {
++            "type": "And",
++            "param": {
++                "all_of": [
++                    "__ScenePrivateCloudWebHeader",
++                    "__ScenePrivateCloudWebStartButton"
++                ],
++                "box_index": 1
++            }
++        },
++        "pre_delay": 0,
++        "action": {"type": "Click"},
++        "post_delay": 0,
++        "rate_limit": 0,
++        "next": ["__ScenePrivateCloudWebStartAccepted"]
++    },
++    "__ScenePrivateCloudWebStartAccepted": {
++        "recognition": {
++            "type": "And",
++            "param": {"all_of": ["__ScenePrivateCloudWebStartButton"]}
++        },
++        "inverse": true,
++        "pre_delay": 0,
++        "post_delay": 0,
++        "rate_limit": 0
++    }
++}
+diff --git a/assets/resource_cloud_web/pipeline/SceneManager/SceneLogin.json b/assets/resource_cloud_web/pipeline/SceneManager/SceneLogin.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..b95732f5c130d501418d4f8e421be3a31a280fa6
+--- /dev/null
++++ b/assets/resource_cloud_web/pipeline/SceneManager/SceneLogin.json
+@@ -0,0 +1,97 @@
++{
++    "__ScenePrivateLogin": {
++        "recognition": {
++            "type": "And",
++            "param": {"all_of": ["__ScenePrivateLoginContinue"]}
++        },
++        "next": [
++            "[JumpBack]__ScenePrivateCloudWebReconnect",
++            "__ScenePrivateLoginMaintenance",
++            "[JumpBack]__ScenePrivateCloseErrorDialog",
++            "[JumpBack]__ScenePrivateCloseLoginAnnouncement",
++            "__ScenePrivateLoginContinue",
++            "__ScenePrivateLogin"
++        ]
++    },
++    "__ScenePrivateLoginContinue": {
++        "next": [
++            "[JumpBack]__ScenePrivateCloudWebReconnect",
++            "__ScenePrivateLoginMaintenance",
++            "[JumpBack]__ScenePrivateCloseErrorDialog",
++            "__ScenePrivateLoginContinueDisappeared",
++            "__ScenePrivateLoginContinue"
++        ]
++    },
++    "__ScenePrivateLoginContinueDisappeared": {
++        "next": [
++            "[JumpBack]__ScenePrivateCloudWebReconnect",
++            "[JumpBack]SceneWaitLoadingExit",
++            "[JumpBack]__ScenePrivateLoginMonthlyPassConfirm",
++            "[JumpBack]__ScenePrivateLoginPristineMonthlyPassConfirm",
++            "[JumpBack]__ScenePrivateLoginCompanionGiftConfirm",
++            "__ScenePrivateLoginSuccess",
++            "[JumpBack]__ScenePrivateLoginCloseDialog"
++        ]
++    },
++    "__ScenePrivateCloudWebConnectionTimeout": {
++        "recognition": {
++            "type": "OCR",
++            "param": {
++                "roi": [
++                    0,
++                    100,
++                    1280,
++                    520
++                ],
++                "expected": ["连接服务器超时"]
++            }
++        },
++        "pre_delay": 0,
++        "post_delay": 0,
++        "rate_limit": 0
++    },
++    "__ScenePrivateCloudWebRetryConnectionButton": {
++        "recognition": {
++            "type": "OCR",
++            "param": {
++                "roi": [
++                    0,
++                    100,
++                    1280,
++                    520
++                ],
++                "expected": ["重试连接"]
++            }
++        },
++        "pre_delay": 0,
++        "post_delay": 0,
++        "rate_limit": 0
++    },
++    "__ScenePrivateCloudWebReconnect": {
++        "recognition": {
++            "type": "And",
++            "param": {
++                "all_of": [
++                    "__ScenePrivateCloudWebConnectionTimeout",
++                    "__ScenePrivateCloudWebRetryConnectionButton"
++                ],
++                "box_index": 1
++            }
++        },
++        "pre_delay": 0,
++        "action": {"type": "Click"},
++        "post_delay": 0,
++        "rate_limit": 0,
++        "next": ["__ScenePrivateCloudWebConnectionRestored"]
++    },
++    "__ScenePrivateCloudWebConnectionRestored": {
++        "recognition": {
++            "type": "And",
++            "param": {"all_of": ["__ScenePrivateCloudWebConnectionTimeout"]}
++        },
++        "inverse": true,
++        "pre_delay": 0,
++        "post_delay": 0,
++        "rate_limit": 0
++    }
++}
+diff --git a/assets/resource_cloud_web/pipeline/SceneManager/SceneMap.json b/assets/resource_cloud_web/pipeline/SceneManager/SceneMap.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..79ea9413489abc3c64c2e81b9df6652cf78f0da6
+--- /dev/null
++++ b/assets/resource_cloud_web/pipeline/SceneManager/SceneMap.json
+@@ -0,0 +1,31 @@
++{
++    "__ScenePrivateMapOtherAreaEnterMapOverview": {
++        "recognition": {
++            "type": "And",
++            "param": {
++                "all_of": [
++                    "InMapAny",
++                    "__ScenePrivateCloudWebMapOverviewButton"
++                ],
++                "box_index": 1
++            }
++        }
++    },
++    "__ScenePrivateCloudWebMapOverviewButton": {
++        "recognition": {
++            "type": "OCR",
++            "param": {
++                "roi": [
++                    1070,
++                    640,
++                    120,
++                    40
++                ],
++                "expected": ["地区总览"]
++            }
++        },
++        "pre_delay": 0,
++        "post_delay": 0,
++        "rate_limit": 0
++    }
++}
+diff --git a/assets/resource_cloud_web/pipeline/SceneManager/SceneMenu.json b/assets/resource_cloud_web/pipeline/SceneManager/SceneMenu.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..d4281315446976df96f5cf0cb15d896d85ef49db
+--- /dev/null
++++ b/assets/resource_cloud_web/pipeline/SceneManager/SceneMenu.json
+@@ -0,0 +1,42 @@
++{
++    "__ScenePrivateMenuListEnterWorld": {
++        "next": [
++            "[JumpBack]SceneNoticeRewardsUpgrade",
++            "[JumpBack]__ScenePrivateLoginMonthlyPassConfirm",
++            "__ScenePrivateAnyEnterWorldSuccess"
++        ]
++    },
++    "__ScenePrivateWorldEnterMenuList": {
++        "pre_delay": 0,
++        "action": {
++            "type": "TouchMove",
++            "param": {
++                "target": [
++                    640,
++                    360
++                ]
++            }
++        },
++        "next": ["__ScenePrivateCloudWebWorldEnterMenuList"]
++    },
++    "__ScenePrivateCloudWebWorldEnterMenuList": {
++        "recognition": {
++            "type": "And",
++            "param": {
++                "all_of": ["__ScenePrivateWorldEnterMenuList"]
++            }
++        },
++        "pre_delay": 0,
++        "action": {
++            "type": "ClickKey",
++            "param": {
++                "key": 27
++            }
++        },
++        "post_delay": 0,
++        "rate_limit": 0,
++        "next": [
++            "__ScenePrivateAnyEnterMenuListSuccess"
++        ]
++    }
++}
+diff --git a/assets/resource_cloud_web/pipeline/SceneManager/SceneWorld.json b/assets/resource_cloud_web/pipeline/SceneManager/SceneWorld.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..9b9ed1bcbaa36c989a51565fa7e2e06f38d140a8
+--- /dev/null
++++ b/assets/resource_cloud_web/pipeline/SceneManager/SceneWorld.json
+@@ -0,0 +1,87 @@
++{
++    "__ScenePrivateAnyEnterWorldSuccess": {
++        "desc": "云网页：确认大世界后复用缓存或 OCR 发布账号身份，覆盖未进入菜单检查的独立寻路任务",
++        "action": {
++            "type": "Custom",
++            "param": {
++                "custom_action": "CaptureUid"
++            }
++        }
++    },
++    "__ScenePrivateCloudWebProtocolPrepareExit": {
++        "recognition": {
++            "type": "And",
++            "param": {
++                "all_of": [
++                    "ProtocolSpaceNormalPrepareEnter",
++                    "ProtocolSpaceEnterSpaceText"
++                ]
++            }
++        },
++        "pre_delay": 0,
++        "action": {
++            "type": "TouchMove",
++            "param": {"target": [
++                    640,
++                    360
++                ]}
++        },
++        "post_delay": 0,
++        "rate_limit": 0,
++        "next": ["__ScenePrivateCloudWebProtocolPrepareExitKey"]
++    },
++    "__ScenePrivateCloudWebProtocolPrepareExitKey": {
++        "recognition": {
++            "type": "And",
++            "param": {"all_of": ["__ScenePrivateCloudWebProtocolPrepareExit"]}
++        },
++        "pre_delay": 0,
++        "action": {"type": "ClickKey", "param": {"key": 27}},
++        "post_delay": 0,
++        "rate_limit": 0,
++        "next": ["__ScenePrivateCloudWebProtocolPrepareExited"]
++    },
++    "__ScenePrivateCloudWebProtocolPrepareExited": {
++        "recognition": {
++            "type": "And",
++            "param": {"all_of": ["__ScenePrivateCloudWebProtocolPrepareExit"]}
++        },
++        "inverse": true,
++        "pre_delay": 0,
++        "post_delay": 0,
++        "rate_limit": 0
++    },
++    "__ScenePrivateWorldSpaceExit": {
++        "action": {
++            "type": "TouchMove",
++            "param": {
++                "target": [
++                    640,
++                    360
++                ]
++            }
++        },
++        "next": ["__ScenePrivateCloudWebWorldSpaceExit"]
++    },
++    "__ScenePrivateCloudWebWorldSpaceExit": {
++        "recognition": {
++            "type": "And",
++            "param": {
++                "all_of": ["__ScenePrivateWorldSpaceExit"]
++            }
++        },
++        "pre_delay": 0,
++        "action": {
++            "type": "ClickKey",
++            "param": {
++                "key": 27
++            }
++        },
++        "post_delay": 0,
++        "rate_limit": 0,
++        "next": [
++            "__ScenePrivateWorldSpaceExitConfirm",
++            "__ScenePrivateEndVisit"
++        ]
++    }
++}
+diff --git a/assets/resource_cloud_web/pipeline/VisitFriends.json b/assets/resource_cloud_web/pipeline/VisitFriends.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..bc3fe29de3a615c107a1769bd2f150085c3af295
+--- /dev/null
++++ b/assets/resource_cloud_web/pipeline/VisitFriends.json
+@@ -0,0 +1,33 @@
++{
++    // 云游戏浮动菜单会拦截键盘，先将鼠标移回视频区域。
++    "VisitFriendsWorldShipExitToMenuFriends": {
++        "action": {
++            "type": "TouchMove",
++            "param": {
++                "target": [
++                    640,
++                    360
++                ]
++            }
++        },
++        "next": ["VisitFriendsCloudWebExitToMenuFriends"]
++    },
++    "VisitFriendsCloudWebExitToMenuFriends": {
++        "recognition": {
++            "type": "And",
++            "param": {
++                "all_of": ["VisitFriendsWorldShipExitToMenuFriends"]
++            }
++        },
++        "pre_delay": 0,
++        "action": {
++            "type": "ClickKey",
++            "param": {
++                "key": 27
++            }
++        },
++        "post_delay": 0,
++        "rate_limit": 0,
++        "next": ["VisitFriendsClearListCompleteAfterShipExit"]
++    }
++}
+diff --git a/assets/tasks/AutoCollect.json b/assets/tasks/AutoCollect.json
+index 9ada253febd937d25f76c1d5ae8f25c74eaa7008..2df265f9f2f3070d32be012f550c317280371c5d 100644
+--- a/assets/tasks/AutoCollect.json
++++ b/assets/tasks/AutoCollect.json
+@@ -15,7 +15,8 @@
+                 "Linux-ScreenCast",
+                 "Linux-Wlroots",
+                 "PlayCover",
+-                "Win32-Front"
++                "Win32-Front",
++                "Win32-CloudWeb"
+             ],
+             "option": [
+                 "AutoCollectSchedule",
+@@ -151,7 +152,8 @@
+                 "Linux-Gamescope",
+                 "Linux-ScreenCast",
+                 "Linux-Wlroots",
+-                "Win32-Front"
++                "Win32-Front",
++                "Win32-CloudWeb"
+             ],
+             "label": "$option.AutoCollectMode.label",
+             "description": "$option.AutoCollectMode.description",
+@@ -256,7 +258,8 @@
+                 "Linux-Gamescope",
+                 "Linux-ScreenCast",
+                 "Linux-Wlroots",
+-                "Win32-Front"
++                "Win32-Front",
++                "Win32-CloudWeb"
+             ],
+             "label": "$option.AutoCollectTargetInventory.label",
+             "description": "$option.AutoCollectTargetInventory.description",
+diff --git a/assets/tasks/AutoSell.json b/assets/tasks/AutoSell.json
+index f53451497113a8df56fd318f17cada2377217bf2..718ffea3043dfcd2758318f6175af22e01d67d68 100644
+--- a/assets/tasks/AutoSell.json
++++ b/assets/tasks/AutoSell.json
+@@ -14,7 +14,8 @@
+                 "Linux-ScreenCast",
+                 "Linux-Wlroots",
+                 "PlayCover",
+-                "Win32-Front"
++                "Win32-Front",
++                "Win32-CloudWeb"
+             ],
+             "option": [
+                 "AutoSellValleyIV",
+diff --git a/assets/tasks/AutoStockStaple.json b/assets/tasks/AutoStockStaple.json
+index bba80fdb158bf300170f4b291752f777b2f7d780..b06b5e649079997a37e8c53075be5b1585078c4a 100644
+--- a/assets/tasks/AutoStockStaple.json
++++ b/assets/tasks/AutoStockStaple.json
+@@ -17,7 +17,8 @@
+                 "MacOS-Background",
+                 "MacOS-Front",
+                 "PlayCover",
+-                "Win32-Front"
++                "Win32-Front",
++                "Win32-CloudWeb"
+             ],
+             "option": [
+                 "AutoStockStapleSchedule",
+diff --git a/assets/tasks/AutoStockpile.json b/assets/tasks/AutoStockpile.json
+index fca82995800bc647426f8c02c4fad1b29ccf81be..ff03133cf922f03dbde286bc854e041fb44a9660 100644
+--- a/assets/tasks/AutoStockpile.json
++++ b/assets/tasks/AutoStockpile.json
+@@ -17,7 +17,8 @@
+                 "MacOS-Background",
+                 "MacOS-Front",
+                 "PlayCover",
+-                "Win32-Front"
++                "Win32-Front",
++                "Win32-CloudWeb"
+             ],
+             "option": [
+                 "AutoStockpileServerTime",
+diff --git a/assets/tasks/CloseCloudWeb.json b/assets/tasks/CloseCloudWeb.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..6de4ab81498e1de69924f2a8752b0440f49907be
+--- /dev/null
++++ b/assets/tasks/CloseCloudWeb.json
+@@ -0,0 +1,12 @@
++{
++    "task": [
++        {
++            "name": "CloseCloudWeb",
++            "label": "$task.CloseGamePC.label",
++            "entry": "CloseCloudWeb",
++            "controller": [
++                "Win32-CloudWeb"
++            ]
++        }
++    ]
++}
+diff --git a/assets/tasks/CreditShopping.json b/assets/tasks/CreditShopping.json
+index cdf44e0398e92639a5b1b7f17c4e32a6bc816762..0059c9ea64ed2f9efd2e4a4837877b1409974262 100644
+--- a/assets/tasks/CreditShopping.json
++++ b/assets/tasks/CreditShopping.json
+@@ -17,7 +17,8 @@
+                 "MacOS-Background",
+                 "MacOS-Front",
+                 "PlayCover",
+-                "Win32-Front"
++                "Win32-Front",
++                "Win32-CloudWeb"
+             ],
+             "pipeline_override": {
+                 "ReceptionRoomCollectClues": {
+diff --git a/assets/tasks/DailyRewards.json b/assets/tasks/DailyRewards.json
+index 87cd4514e135f5cad170e8422dc1cd387767e932..d981f689b1e8824eccaf0e8ec96c3d597dbc49fb 100644
+--- a/assets/tasks/DailyRewards.json
++++ b/assets/tasks/DailyRewards.json
+@@ -17,7 +17,8 @@
+                 "MacOS-Background",
+                 "MacOS-Front",
+                 "PlayCover",
+-                "Win32-Front"
++                "Win32-Front",
++                "Win32-CloudWeb"
+             ],
+             "option": [
+                 "DailyEmailRewards",
+diff --git a/assets/tasks/DeliveryJobs.json b/assets/tasks/DeliveryJobs.json
+index 1c4aba51a2d6e8c48e6dfb3e00aa93315d344a4b..f295da3556faf5692f947998435d42c54b708806 100644
+--- a/assets/tasks/DeliveryJobs.json
++++ b/assets/tasks/DeliveryJobs.json
+@@ -17,7 +17,8 @@
+                 "MacOS-Background",
+                 "MacOS-Front",
+                 "PlayCover",
+-                "Win32-Front"
++                "Win32-Front",
++                "Win32-CloudWeb"
+             ],
+             "option": [
+                 "ValleyIV",
+diff --git a/assets/tasks/DijiangRewards.json b/assets/tasks/DijiangRewards.json
+index 68fb97efda46d5cb44945c85b98e86e9d6289917..85f23d36eb2fece4d333c76a5b694f27b74f7c3d 100644
+--- a/assets/tasks/DijiangRewards.json
++++ b/assets/tasks/DijiangRewards.json
+@@ -17,7 +17,8 @@
+                 "MacOS-Background",
+                 "MacOS-Front",
+                 "PlayCover",
+-                "Win32-Front"
++                "Win32-Front",
++                "Win32-CloudWeb"
+             ],
+             "option": [
+                 "StageTaskSetting",
+diff --git a/assets/tasks/EnvironmentMonitoring.json b/assets/tasks/EnvironmentMonitoring.json
+index e18e156fb6fd296c1a099694e54e48c9123e0a14..df9d5f5ac0ded28f8845392fde0450d8f483dab5 100644
+--- a/assets/tasks/EnvironmentMonitoring.json
++++ b/assets/tasks/EnvironmentMonitoring.json
+@@ -15,7 +15,8 @@
+                 "Linux-ScreenCast",
+                 "Linux-Wlroots",
+                 "PlayCover",
+-                "Win32-Front"
++                "Win32-Front",
++                "Win32-CloudWeb"
+             ]
+         }
+     ]
+diff --git a/assets/tasks/OutpostTrading.json b/assets/tasks/OutpostTrading.json
+index 31e97d143d92503ccb15939a3602b0f4662be57b..449ede4fdf30b5f1e49371cbec649ff2782e0ce5 100644
+--- a/assets/tasks/OutpostTrading.json
++++ b/assets/tasks/OutpostTrading.json
+@@ -17,7 +17,8 @@
+                 "MacOS-Background",
+                 "MacOS-Front",
+                 "PlayCover",
+-                "Win32-Front"
++                "Win32-Front",
++                "Win32-CloudWeb"
+             ],
+             "option": [
+                 "SellProductSchedule",
+diff --git a/assets/tasks/ProtocolSpace.json b/assets/tasks/ProtocolSpace.json
+index 5418ce144c150234d5e916225daa0ae3bf28d240..a0f04372d0555024438d5a216f5bf9e13d84a4dd 100644
+--- a/assets/tasks/ProtocolSpace.json
++++ b/assets/tasks/ProtocolSpace.json
+@@ -15,7 +15,8 @@
+                 "Linux-Gamescope",
+                 "Linux-ScreenCast",
+                 "Linux-Wlroots",
+-                "Win32-Front"
++                "Win32-Front",
++                "Win32-CloudWeb"
+             ],
+             "option": [
+                 "ProtocolSpaceSchedule",
+diff --git a/assets/tasks/SeizeDeliveryJobs.json b/assets/tasks/SeizeDeliveryJobs.json
+index 722699b8c748582e3a2fb7542678802c9fc0bf71..3072087f3f0c470d22c90addc9530fb0290939c6 100644
+--- a/assets/tasks/SeizeDeliveryJobs.json
++++ b/assets/tasks/SeizeDeliveryJobs.json
+@@ -15,7 +15,8 @@
+                 "Linux-ScreenCast",
+                 "Linux-Wlroots",
+                 "PlayCover",
+-                "Win32-Front"
++                "Win32-Front",
++                "Win32-CloudWeb"
+             ],
+             "pipeline_override": {
+                 "AutoDeliveryDeliveryMissionNotFound": {
+diff --git a/assets/tasks/VisitFriends.json b/assets/tasks/VisitFriends.json
+index dea81bd68b90d8243c7a3c0383ee9afe06993ada..8a5bbe9cc7d596725c04e58af189836471870772 100644
+--- a/assets/tasks/VisitFriends.json
++++ b/assets/tasks/VisitFriends.json
+@@ -17,7 +17,8 @@
+                 "MacOS-Background",
+                 "MacOS-Front",
+                 "PlayCover",
+-                "Win32-Front"
++                "Win32-Front",
++                "Win32-CloudWeb"
+             ],
+             "option": [
+                 "VisitFriendsRemark",
+diff --git a/assets/tasks/ZiplineImport.json b/assets/tasks/ZiplineImport.json
+index 40c31b24e4db98bacd69b378c09cbb22f41e2bf3..913be84506775f768911e16046e7d9bf493f23f9 100644
+--- a/assets/tasks/ZiplineImport.json
++++ b/assets/tasks/ZiplineImport.json
+@@ -13,6 +13,7 @@
+                 "Linux-ScreenCast",
+                 "Linux-Wlroots",
+                 "Win32-Front",
++                "Win32-CloudWeb",
+                 "ADB",
+                 "PlayCover"
+             ],
+@@ -26,6 +27,7 @@
+             "type": "switch",
+             "controller": [
+                 "Win32-Front",
++                "Win32-CloudWeb",
+                 "ADB",
+                 "PlayCover"
+             ],
+diff --git a/assets/tasks/preset/DailyFull.json b/assets/tasks/preset/DailyFull.json
+index f40b89ad44f4132cccbb745d788164a5c3565d34..e80ee91b9fa782b19866f71408a05c11d8aea7d3 100644
+--- a/assets/tasks/preset/DailyFull.json
++++ b/assets/tasks/preset/DailyFull.json
+@@ -146,6 +146,9 @@
+             "pretask": [
+                 {
+                     "name": "LaunchGamePC"
++                },
++                {
++                    "name": "LaunchCloudWeb"
+                 }
+             ]
+         }
+diff --git a/assets/tasks/preset/QuickDaily.json b/assets/tasks/preset/QuickDaily.json
+index b04f4b209aca6084f72c432f429bef55011aa084..b0d69885a8ef8e3f084004d6fdc18e24f0c1a4ba 100644
+--- a/assets/tasks/preset/QuickDaily.json
++++ b/assets/tasks/preset/QuickDaily.json
+@@ -55,6 +55,9 @@
+             "pretask": [
+                 {
+                     "name": "LaunchGamePC"
++                },
++                {
++                    "name": "LaunchCloudWeb"
+                 }
+             ]
+         }
+diff --git a/assets/tasks/pretasks/LaunchCloudWeb.json b/assets/tasks/pretasks/LaunchCloudWeb.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..4ce370c224015184a91a94e3d8ed7a439d68f146
+--- /dev/null
++++ b/assets/tasks/pretasks/LaunchCloudWeb.json
+@@ -0,0 +1,13 @@
++{
++    "pretask": {
++        "controller": [
++            "Win32-CloudWeb"
++        ],
++        "exec": "agent/cloud-webview",
++        "args": [
++            "--prepare"
++        ],
++        "name": "LaunchCloudWeb",
++        "label": "$pretask.LaunchCloudWeb.label"
++    }
++}
+diff --git a/assets/tasks/pretasks/LoginCloudWeb.json b/assets/tasks/pretasks/LoginCloudWeb.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..5e9ba071de43d9dbc135212783757652555a547b
+--- /dev/null
++++ b/assets/tasks/pretasks/LoginCloudWeb.json
+@@ -0,0 +1,13 @@
++{
++    "pretask": {
++        "controller": [
++            "Win32-CloudWeb"
++        ],
++        "exec": "agent/cloud-webview",
++        "args": [
++            "--login"
++        ],
++        "name": "LoginCloudWeb",
++        "label": "$pretask.LoginCloudWeb.label"
++    }
++}

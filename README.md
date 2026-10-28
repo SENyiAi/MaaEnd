@@ -1,4 +1,7 @@
 <!-- markdownlint-disable MD033 MD041 -->
+
+> 此 fork 提供 Windows 云终末地网页控制器。打开 [Build CloudWeb GUI](https://github.com/SENyiAi/MaaEnd/actions/workflows/cloud-web-build.yml) 可拉取最新上游并构建 GUI；接入与维护方法见 [cloud-web](./cloud-web/README.md)。
+
 <p align="center">
   <img alt="LOGO" src="./docs/images/MaaEnd-Tiny-512.png" width="256" height="256" />
 </p>

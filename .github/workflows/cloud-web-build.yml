@@ -1,0 +1,144 @@
+name: Build CloudWeb GUI
+
+on:
+    workflow_dispatch:
+        inputs:
+            upstream_ref:
+                description: "上游分支、标签或提交；留空使用 upstream.json"
+                required: false
+                type: string
+    push:
+        branches: [v2]
+        paths: [".github/workflows/cloud-web-build.yml", "cloud-web/**"]
+    schedule:
+        - cron: "17 21 * * *"
+
+permissions:
+    contents: read
+
+concurrency:
+    group: cloud-build-${{ github.ref }}
+    cancel-in-progress: false
+
+jobs:
+    windows:
+        runs-on: windows-2025
+        timeout-minutes: 90
+        env:
+            PYTHONIOENCODING: utf-8
+            PYTHONUNBUFFERED: "1"
+        defaults:
+            run:
+                shell: pwsh
+                working-directory: cloud-web
+        steps:
+            - uses: actions/checkout@v6
+              with:
+                  persist-credentials: false
+
+            - uses: astral-sh/setup-uv@v10.3.0
+              with:
+                  python-version: "3.14"
+
+            - name: Test integration scripts
+              run: python -m unittest discover -s tests -v
+
+            - name: Fetch upstream and apply cloud patches
+              env:
+                  UPSTREAM_REF: ${{ inputs.upstream_ref }}
+              run: python scripts/prepare.py prepare --ref "$env:UPSTREAM_REF"
+
+            - name: Initialize upstream dependencies and recognition fixtures
+              run: |
+                  git -C .work/upstream submodule update --init --recursive agent/cpp-algo/MaaUtils assets/resource/model tests/MaaEndTestset
+                  if ($LASTEXITCODE) { exit $LASTEXITCODE }
+                  python scripts/prepare.py fixtures
+
+            - uses: actions/setup-go@v6
+              with:
+                  go-version-file: cloud-web/.work/upstream/agent/go-service/go.mod
+                  cache-dependency-path: cloud-web/.work/upstream/agent/go-service/go.sum
+
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: "24"
+
+            - name: Download released Framework and unmodified GUI
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  $config = Get-Content upstream.json -Raw | ConvertFrom-Json
+                  foreach ($component in @("framework", "gui")) {
+                    $repo = $config."${component}_repository"
+                    $ref = $config."${component}_ref"
+                    $arguments = @("release", "view", "--repo", $repo, "--json", "tagName")
+                    if ($ref -ne "latest") { $arguments += $ref }
+                    $release = & gh @arguments | ConvertFrom-Json
+                    if ($LASTEXITCODE) { exit $LASTEXITCODE }
+                    $destination = ".work/downloads/$component"
+                    gh release download $release.tagName --repo $repo --pattern "*win-x86_64*.zip" --dir $destination
+                    if ($LASTEXITCODE) { exit $LASTEXITCODE }
+                    $archives = @(Get-ChildItem $destination -Filter *.zip)
+                    if ($archives.Count -ne 1) { throw "Expected exactly one $component Windows x64 archive" }
+                    $extract = if ($component -eq "framework") { ".work/upstream/deps" } else { ".work/downloads/MXU" }
+                    Expand-Archive -LiteralPath $archives[0].FullName -DestinationPath $extract
+                    "${component}_tag=$($release.tagName)" >> $env:GITHUB_ENV
+                  }
+
+            - name: Verify dependency compatibility
+              working-directory: cloud-web/.work/upstream
+              env:
+                  GITHUB_TOKEN: ${{ github.token }}
+              run: |
+                  uv run --frozen tools/check_maautils_sync.py --maafw-ref "$env:framework_tag"
+                  if ($LASTEXITCODE) { exit $LASTEXITCODE }
+                  uv run --frozen tools/maadeps-download.py x64-windows
+                  if ($LASTEXITCODE) { exit $LASTEXITCODE }
+                  uv run --frozen -m tools.setup.dep_3rdparty --webview2
+
+            - name: Run page, installer and recognition tests
+              working-directory: cloud-web/.work/upstream
+              run: |
+                  corepack enable
+                  if ($LASTEXITCODE) { exit $LASTEXITCODE }
+                  corepack pnpm install --frozen-lockfile
+                  if ($LASTEXITCODE) { exit $LASTEXITCODE }
+                  node --test agent/cpp-algo/cloud-webview/tests/*.test.mjs
+                  if ($LASTEXITCODE) { exit $LASTEXITCODE }
+                  uv run --frozen python -m unittest tools.setup.test_setup_workspace
+                  if ($LASTEXITCODE) { exit $LASTEXITCODE }
+                  corepack pnpm check
+                  if ($LASTEXITCODE) { exit $LASTEXITCODE }
+                  corepack pnpm test
+
+            - name: Build Go agent, C++ agent and WebView host
+              working-directory: cloud-web/.work/upstream
+              run: uv run --frozen -m tools.setup.build_and_install --cpp-algo --ci --os win --arch x86_64
+
+            - name: Run native policy tests
+              run: ctest --test-dir .work/upstream/agent/cpp-algo/build -C RelWithDebInfo -L '^cloud-policy$' --no-tests=error --output-on-failure
+
+            - name: Assemble clean GUI package
+              env:
+                  DISTRIBUTION_REPOSITORY: ${{ github.repository }}
+              run: python scripts/package.py --repository "$env:DISTRIBUTION_REPOSITORY" --framework-tag "$env:framework_tag" --gui-tag "$env:gui_tag"
+
+            - name: Upload GUI package
+              uses: actions/upload-artifact@v6
+              with:
+                  name: MaaEnd-CloudWeb-Windows-x64-${{ github.run_number }}
+                  path: cloud-web/dist/*
+                  if-no-files-found: error
+                  retention-days: 14
+
+            - name: Upload preparation and test diagnostics
+              if: always()
+              uses: actions/upload-artifact@v6
+              with:
+                  name: CloudWeb-diagnostics-${{ github.run_number }}
+                  path: |
+                      cloud-web/.work/prepare.json
+                      cloud-web/.work/upstream/agent/cpp-algo/build/Testing/Temporary/LastTest.log
+                      cloud-web/.work/upstream/tests/maatools/error_details.json
+                  if-no-files-found: ignore
+                  retention-days: 14

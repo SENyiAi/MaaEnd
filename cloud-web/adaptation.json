@@ -1,0 +1,121 @@
+{
+    "patches": [
+        {
+            "path": "patches/0001-host-and-agent.patch",
+            "sha256": "85d611744efbe4f7abdf36da83814b30da1de743644512680abc0b5f3c85e29c",
+            "files": 45
+        },
+        {
+            "path": "patches/0002-resources.patch",
+            "sha256": "83a3fe3b020595a3a72f9b09147caf6ebb918d11dd5457f1c9e804b6a6dba832",
+            "files": 43
+        },
+        {
+            "path": "patches/0003-tests-and-docs.patch",
+            "sha256": "9d5a77002f854ecc42a64993170701424201d08b78d0189208afeb4a705ad125",
+            "files": 9
+        }
+    ],
+    "fixtures": [
+        {
+            "path": "Win32/Official_CN/云终末地_协议空间入场.png",
+            "sha256": "01320a8b8be4e3e9a1745ea163f927b80904e02642f0a349aee98b8e8218037e"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_协议空间机制提示.png",
+            "sha256": "4379b5e4403d71d2211c264fb84b2ace08618444926c687868440eee48341a21"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_协议空间领奖.png",
+            "sha256": "6da75b0075354302918c53a32798d41a9f0015bed6e37764cea57fc8a78fc5c5"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_培养舱提取基核.png",
+            "sha256": "cc5091df33693590575065da8a5f509b26666f75fa35780544287c564bcca6ab"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_大世界.png",
+            "sha256": "509fed0b7164feb71fa131df29d948b97c3551618da381604c31bdaac1c220cc"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_好友价格高亮.png",
+            "sha256": "c5aec93304632e389f1bca90d43dcb86b8f18a981213f7f27145f52ccc9113b0"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_好友价格高亮_第二帧.png",
+            "sha256": "20390844e5664fcc98413a2d1b55a97e92690df7fc14ab1beb9924a69f96fcfa"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_好友价格高亮_遮挡竖条.png",
+            "sha256": "05b056843771425988c879ae92ad888e59472627f369bc49054f9306e39de006"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_好友拜访确认.png",
+            "sha256": "d5d1672fad9d00211fb429701d259ef179889e3841c301b346cab271d9d317a8"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_好友拜访确认_遮挡黄色按钮.png",
+            "sha256": "e18cefa20621fc7a6565e83070bb6e22714430d49937a383a171d58604132d1a"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_官网开始游戏.png",
+            "sha256": "2c03218cea903db34c68a4f9f923abf37970b32113d32b600435110d34289e45"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_官网开始游戏_遮挡开始按钮.png",
+            "sha256": "684fbc18d5d77353c48b2d05da82fab3eda10386aa60f5c3825eda481fa511f8"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_官网开始游戏_遮挡用户中心.png",
+            "sha256": "16f9d0152474ec3b84ab141e1ba5d9181273006c23b0e1bc6441e4c2bee4f05c"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_帝江号传送.png",
+            "sha256": "ec0179a8986ae379fbd2af74ff587e9afcbf7934d4a1c8e4b4cb149c0a6cebd3"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_帝江号送货恢复.png",
+            "sha256": "8e9eb485d83fa89abe17d097e59f466145a24f283423310f6859afb8619506e0"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_据点交易.png",
+            "sha256": "3cce76a20d4c7c5ee289ae9af36a7f34784bd451c87df67c566471f0ce245532"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_武陵城地图总览入口.png",
+            "sha256": "9791458df4c9c98c15af136989f19dd668684414d4714fde31ecc867de659a23"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_物资调度绿线.png",
+            "sha256": "7cb6f734f6b4a80acf9a8776d7b6ffb06127979475bb56bcff62e7d4113bd420"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_物资调度绿线_遮挡名称.png",
+            "sha256": "875136a55c837e453216d9c747d909d216bb738bf5f019388580ac3b9728463b"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_物资调度绿线_遮挡绿线.png",
+            "sha256": "7aa070c39d476bf46310e13dc7100aa7ee8d88a492290fe2a4193de6072bae81"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_菜单总列表.png",
+            "sha256": "7d39bf1722868bb16a1990917d39e96ebc025c5e68f372e348c6ed091b369a4d"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_菜单总列表_遮挡底部标志.png",
+            "sha256": "569d64755278b4f6e806021af707b82f3446fd5857f3b409daed518de0869c68"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_菜单总列表_遮挡等级文字.png",
+            "sha256": "b6c5c4538b742fdf88a1d5de2dd20f551821aca6f8851e760205976a477f2dc1"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_菜单总列表_遮挡顶部新闻.png",
+            "sha256": "f9c3002cdcb533c08098a8f0cf66966045787be535b8090371c08d5fe5c2f389"
+        },
+        {
+            "path": "Win32/Official_CN/云终末地_调度申请_开始运送.png",
+            "sha256": "0b5595eba354e304785b6163d35f364aae790db439d4400474db3adeb903d34a"
+        }
+    ]
+}
