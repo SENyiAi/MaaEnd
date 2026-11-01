@@ -2,7 +2,7 @@
     "patches": [
         {
             "path": "patches/0001-host-and-agent.patch",
-            "sha256": "4579168494ce103ef32db0c29ad43ff9975850ecd5c8cc27e1a9fc7fdaf67739",
+            "sha256": "5d7f2e2a6b27261e3dea62825b8bf25a55e3b9121b1739533d95a6987e3361b5",
             "files": 45
         },
         {

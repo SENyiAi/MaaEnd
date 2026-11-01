@@ -1175,10 +1175,10 @@ index 0000000000000000000000000000000000000000..482f4f4e4f87d066481db8e601bac809
 +};
 diff --git a/agent/cpp-algo/cloud-webview/Win32ControllerBridge.cpp b/agent/cpp-algo/cloud-webview/Win32ControllerBridge.cpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..fce8534e4e6ef628d62ff6a4f50ad91ab789999c
+index 0000000000000000000000000000000000000000..688a866132059a86c1e5c287d3188a2cb570e9f7
 --- /dev/null
 +++ b/agent/cpp-algo/cloud-webview/Win32ControllerBridge.cpp
-@@ -0,0 +1,407 @@
+@@ -0,0 +1,416 @@
 +#include "Win32ControllerBridge.h"
 +
 +#include <future>
@@ -1518,11 +1518,20 @@ index 0000000000000000000000000000000000000000..fce8534e4e6ef628d62ff6a4f50ad91a
 +        ok = input_.touchUp(message == WM_LBUTTONUP ? 0 : message == WM_RBUTTONUP ? 1 : 2);
 +        break;
 +    case WM_MOUSEWHEEL:
-+    case WM_MOUSEHWHEEL:
++    case WM_MOUSEHWHEEL: {
++        // Wheel messages carry screen coordinates, unlike button/move messages.
++        // Convert the Framework target into the bridge's fixed input space.
++        POINT point { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
++        if (!ScreenToClient(hwnd, &point)) {
++            return 0;
++        }
 +        ok = input_.scroll(
 +            message == WM_MOUSEHWHEEL ? GET_WHEEL_DELTA_WPARAM(wparam) : 0,
-+            message == WM_MOUSEWHEEL ? -GET_WHEEL_DELTA_WPARAM(wparam) : 0);
++            message == WM_MOUSEWHEEL ? -GET_WHEEL_DELTA_WPARAM(wparam) : 0,
++            point.x,
++            point.y);
 +        break;
++    }
 +    case WM_KEYDOWN:
 +    case WM_SYSKEYDOWN:
 +    case WM_KEYUP:
@@ -1807,10 +1816,10 @@ index 0000000000000000000000000000000000000000..4be63497616ca6e9fab4f91d840b6c74
 +} // namespace cloud
 diff --git a/agent/cpp-algo/cloud-webview/input_policy.h b/agent/cpp-algo/cloud-webview/input_policy.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..cd1828645bae8b673e0304396e0f044353542760
+index 0000000000000000000000000000000000000000..c50b869bbd6c30755424159c5cbd24a676fa7013
 --- /dev/null
 +++ b/agent/cpp-algo/cloud-webview/input_policy.h
-@@ -0,0 +1,129 @@
+@@ -0,0 +1,133 @@
 +#pragma once
 +
 +namespace cloud
@@ -1924,8 +1933,12 @@ index 0000000000000000000000000000000000000000..cd1828645bae8b673e0304396e0f0443
 +        // suppress unintended camera rotation. Explicit relative input keeps
 +        // its requested delta even when a button is held.
 +        if (dx === 0 && dy === 0 && event.buttons) return;
++        // The SDK drops an exactly zero move before sending its absolute
++        // cursor position. Its relative camera delta is rounded to integer
++        // pixels afterwards. A subpixel marker passes that gate while still
++        // encoding zero camera motion, so hover and wheel targets stay valid.
 +        Object.defineProperties(event, {
-+            movementX: {value: dx}, movementY: {value: dy}
++            movementX: {value: dx === 0 && dy === 0 ? Number.EPSILON : dx}, movementY: {value: dy}
 +        });
 +    }, true);
 +    Object.defineProperty(window, 'focus', {
@@ -2654,10 +2667,10 @@ index 0000000000000000000000000000000000000000..55561fc3efecd74477b37697342d443a
 +set_tests_properties(cloud-startup-notice PROPERTIES LABELS "cloud-policy")
 diff --git a/agent/cpp-algo/cloud-webview/tests/cloud_input_test.cpp b/agent/cpp-algo/cloud-webview/tests/cloud_input_test.cpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..4ceeeee765348070d3392340469b043078028b0e
+index 0000000000000000000000000000000000000000..ba20fe10d27e1ee35ef4068b3844879d91df3845
 --- /dev/null
 +++ b/agent/cpp-algo/cloud-webview/tests/cloud_input_test.cpp
-@@ -0,0 +1,151 @@
+@@ -0,0 +1,152 @@
 +#include <iostream>
 +#include <tuple>
 +#include <vector>
@@ -2777,8 +2790,9 @@ index 0000000000000000000000000000000000000000..4ceeeee765348070d3392340469b0430
 +        input.relativeMove(20, -5) && transport.relative_buttons == 1 && transport.relative_modifiers == 8,
 +        "relative camera input retains held button and key state");
 +    expect(
-+        input.scroll(0, 100) && transport.mouse_events.back().buttons == 1 && transport.mouse_events.back().modifiers == 8,
-+        "scroll retains held buttons and modifiers");
++        input.scroll(0, 100, 285, 350) && transport.mouse_events.back().buttons == 1 && transport.mouse_events.back().modifiers == 8
++            && transport.mouse_events.back().x == 285 && transport.mouse_events.back().y == 350,
++        "scroll retains the target, held buttons and modifiers");
 +    expect(
 +        input.releaseAll() && transport.mouse_events.back().buttons == 0 && std::get<1>(transport.key_events.back()) == false,
 +        "inactive releases every key and button");
@@ -2811,10 +2825,10 @@ index 0000000000000000000000000000000000000000..4ceeeee765348070d3392340469b0430
 +}
 diff --git a/agent/cpp-algo/cloud-webview/tests/mouse_policy.test.mjs b/agent/cpp-algo/cloud-webview/tests/mouse_policy.test.mjs
 new file mode 100644
-index 0000000000000000000000000000000000000000..54edcf8792e40c82309f2ddfe9b61c36284b4933
+index 0000000000000000000000000000000000000000..38cbe8b38e63f44ae0d154983ba56fcc6dfddf8a
 --- /dev/null
 +++ b/agent/cpp-algo/cloud-webview/tests/mouse_policy.test.mjs
-@@ -0,0 +1,285 @@
+@@ -0,0 +1,307 @@
 +import assert from "node:assert/strict";
 +import {readFileSync} from "node:fs";
 +import test from "node:test";
@@ -2991,13 +3005,10 @@ index 0000000000000000000000000000000000000000..54edcf8792e40c82309f2ddfe9b61c36
 +        640,
 +    ]) {
 +        assert.equal(page.prepare(x, 360, 0, 0), true);
-+        assert.deepEqual(
-+            page.move(x, 360, 100, -10),
-+            [
-+                0,
-+                0,
-+            ],
-+        );
++        assert.deepEqual(page.move(x, 360, 100, -10), [
++            Number.EPSILON,
++            0,
++        ]);
 +    }
 +    assert.deepEqual(
 +        page.move(650, 360, 10, 5),
@@ -3046,13 +3057,38 @@ index 0000000000000000000000000000000000000000..54edcf8792e40c82309f2ddfe9b61c36
 +        ],
 +    );
 +    page.prepare(740, 360, 0, 0);
-+    assert.deepEqual(
-+        page.move(740, 360, 100, 5),
-+        [
-+            0,
-+            0,
-+        ],
-+    );
++    assert.deepEqual(page.move(740, 360, 100, 5), [
++        Number.EPSILON,
++        0,
++    ]);
++});
++
++test("absolute cursor updates pass the SDK gate without encoding camera motion", () => {
++    const page = browser();
++    page.prepare(285, 350, 0, 0);
++    const [
++        dx,
++        dy,
++    ] = page.move(285, 350, -355, -10);
++    assert.ok(dx !== 0 || dy !== 0);
++    for (const scale of [
++        0.5,
++        1,
++        1.25,
++        1.5,
++        2,
++        4,
++    ]) {
++        for (const sensitivity of [
++            0.1,
++            1,
++            4,
++            100,
++        ]) {
++            assert.equal(Math.round(dx * scale * sensitivity), 0);
++            assert.equal(Math.round(dy * scale * sensitivity), 0);
++        }
++    }
 +});
 +
 +test("unrelated and synthetic events cannot consume prepared movement", () => {
@@ -3628,10 +3664,10 @@ index 0000000000000000000000000000000000000000..eb4faec0081841d45f26ca2f4963dd94
 +}
 diff --git a/agent/cpp-algo/cloud-webview/tests/win32_bridge_test.cpp b/agent/cpp-algo/cloud-webview/tests/win32_bridge_test.cpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..97cf3ad0b01df35db8eeccba2fb86f8191a06c6c
+index 0000000000000000000000000000000000000000..7397790b62fe79abec3ebe39333d6a82502fb05a
 --- /dev/null
 +++ b/agent/cpp-algo/cloud-webview/tests/win32_bridge_test.cpp
-@@ -0,0 +1,260 @@
+@@ -0,0 +1,275 @@
 +#include <atomic>
 +#include <chrono>
 +#include <iostream>
@@ -3820,6 +3856,21 @@ index 0000000000000000000000000000000000000000..97cf3ad0b01df35db8eeccba2fb86f81
 +        Check(
 +            release.action == CloudMouseAction::Release && release.x == 1180 && release.y == 575 && release.buttons == 0,
 +            "Win32 swipe released at its starting position");
++        POINT wheel_target { 285, 350 };
++        Check(ClientToScreen(hwnd, &wheel_target), "wheel target conversion failed");
++        SendMessageW(hwnd, WM_MOUSEWHEEL, MAKEWPARAM(0, static_cast<short>(-180)), MAKELPARAM(wheel_target.x, wheel_target.y));
++        const auto& wheel = transport.mouse_events.back();
++        Check(
++            wheel.action == CloudMouseAction::Wheel && wheel.x == 285 && wheel.y == 350 && wheel.delta_y == 180,
++            "vertical scroll lost the Framework target or direction");
++        wheel_target = { 1070, 430 };
++        Check(ClientToScreen(hwnd, &wheel_target), "horizontal wheel target conversion failed");
++        SendMessageW(hwnd, WM_MOUSEHWHEEL, MAKEWPARAM(0, 120), MAKELPARAM(wheel_target.x, wheel_target.y));
++        const auto& horizontal_wheel = transport.mouse_events.back();
++        Check(
++            horizontal_wheel.action == CloudMouseAction::Wheel && horizontal_wheel.x == 1070 && horizontal_wheel.y == 430
++                && horizontal_wheel.delta_x == 120,
++            "horizontal scroll lost the Framework target or direction");
 +        wait(MaaControllerPostKeyDown(ctrl, 27));
 +        wait(MaaControllerPostKeyUp(ctrl, 27));
 +        Check(transport.keys == std::vector<std::pair<int32_t, bool>> { { 27, true }, { 27, false } }, "Esc mismatch");
@@ -3894,7 +3945,7 @@ index 0000000000000000000000000000000000000000..97cf3ad0b01df35db8eeccba2fb86f81
 +}
 diff --git a/agent/cpp-algo/cloud-webview/transport/CloudInput.h b/agent/cpp-algo/cloud-webview/transport/CloudInput.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..a312d8491a9a48329302562a44eef67a99d7e9ec
+index 0000000000000000000000000000000000000000..598fe2e920fa0529d8c8d7124eada3e2f7fd3c59
 --- /dev/null
 +++ b/agent/cpp-algo/cloud-webview/transport/CloudInput.h
 @@ -0,0 +1,167 @@
@@ -3991,10 +4042,10 @@ index 0000000000000000000000000000000000000000..a312d8491a9a48329302562a44eef67a
 +        return transport_.relative_move(dx, dy, buttons(), modifiers());
 +    }
 +
-+    bool scroll(int32_t dx, int32_t dy)
++    bool scroll(int32_t dx, int32_t dy, int32_t x, int32_t y)
 +    {
 +        std::lock_guard lock(mutex_);
-+        return transport_.mouse({ CloudMouseAction::Wheel, 640, 360, buttons(), dx, dy, -1, modifiers() });
++        return transport_.mouse({ CloudMouseAction::Wheel, x, y, buttons(), dx, dy, -1, modifiers() });
 +    }
 +
 +    bool releaseAll()
