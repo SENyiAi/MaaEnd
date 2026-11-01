@@ -51,6 +51,13 @@ def package(workdir: Path, repository: str, framework_tag: str, output: Path) ->
     gui_tag = versions.get("mxu")
     if not isinstance(gui_tag, str) or not gui_tag.strip():
         raise ValueError("Missing upstream-installed MXU version")
+    # The upstream merger consumes the source files and skips an existing nodes.json.
+    # Reusing its output would silently replace all pipelines with empty objects.
+    for pipeline in install.glob("resource*/pipeline"):
+        if (pipeline / "nodes.json").is_file() and not any(
+            path.name != "nodes.json" for path in pipeline.rglob("*.json")
+        ):
+            raise ValueError(f"Pipeline already merged; rebuild fresh install assets before packaging: {pipeline}")
     shutil.copytree(upstream / "deps" / "bin", install / "maafw", dirs_exist_ok=True)
     shutil.copytree(upstream / "deps" / "share" / "MaaAgentBinary", install / "maafw" / "MaaAgentBinary")
     # MXU remains the released, unmodified binary; only the distribution name changes.

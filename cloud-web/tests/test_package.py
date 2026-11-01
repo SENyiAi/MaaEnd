@@ -99,6 +99,15 @@ class PackagingTest(unittest.TestCase):
             self.build()
         self.assertFalse(self.output.exists())
 
+    def test_already_merged_pipeline_is_rejected_before_modifying_gui(self):
+        write_json(self.install / "resource_cloud_web/pipeline/nodes.json", {"CloudTask": {"action": "DoNothing"}})
+        with self.assertRaisesRegex(ValueError, "Pipeline already merged"):
+            self.build()
+        self.assertTrue((self.install / "mxu.exe").is_file())
+        self.assertFalse((self.install / "MaaEnd.exe").exists())
+        distribution.subprocess.run.assert_not_called()
+        self.assertFalse(self.output.exists())
+
 
 if __name__ == "__main__":
     unittest.main()
