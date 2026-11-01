@@ -1,7 +1,7 @@
 {
     "repository": "MaaEnd/MaaEnd",
     "ref": "v2",
-    "patch_base": "41b969f35c8285a44dca19d974059286d1f17d16",
+    "patch_base": "9cc48c93d21ae2b58737e8bac116f628a7a1c6da",
     "framework_repository": "MaaXYZ/MaaFramework",
     "framework_ref": "latest"
 }

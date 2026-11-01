@@ -2,17 +2,17 @@
     "patches": [
         {
             "path": "patches/0001-host-and-agent.patch",
-            "sha256": "85d611744efbe4f7abdf36da83814b30da1de743644512680abc0b5f3c85e29c",
+            "sha256": "4579168494ce103ef32db0c29ad43ff9975850ecd5c8cc27e1a9fc7fdaf67739",
             "files": 45
         },
         {
             "path": "patches/0002-resources.patch",
-            "sha256": "83a3fe3b020595a3a72f9b09147caf6ebb918d11dd5457f1c9e804b6a6dba832",
+            "sha256": "38e0ed7514ef2fe33cc96556bc6c537fb071115196250658577458b53546f1e6",
             "files": 43
         },
         {
             "path": "patches/0003-tests-and-docs.patch",
-            "sha256": "9d5a77002f854ecc42a64993170701424201d08b78d0189208afeb4a705ad125",
+            "sha256": "e29966ef6c9eb94a0fceea00deede6b832af0199ddd3bbfef7650fcaac634227",
             "files": 9
         }
     ],

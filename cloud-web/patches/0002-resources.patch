@@ -1,5 +1,5 @@
 diff --git a/assets/interface.json b/assets/interface.json
-index d6af619050c8140b6121066a66e3f018d87c6413..cab22e0bd31bddf7341e06c135bdb87524e2eedb 100644
+index 551259fbf6f07e7c14943adeeda25ac7ba0b12e8..9e6ddbab9be72d5674bf511eb817707b1ac938bb 100644
 --- a/assets/interface.json
 +++ b/assets/interface.json
 @@ -37,6 +37,22 @@
@@ -25,25 +25,25 @@ index d6af619050c8140b6121066a66e3f018d87c6413..cab22e0bd31bddf7341e06c135bdb875
          {
              "name": "ADB",
              "label": "$controller.ADB.label",
-@@ -203,6 +219,8 @@
-     "import": [
+@@ -204,6 +220,8 @@
          // pretask
          "tasks/pretasks/LaunchGamePC.json",
+         "tasks/pretasks/LaunchGamePlayCover.json",
 +        "tasks/pretasks/LoginCloudWeb.json",
 +        "tasks/pretasks/LaunchCloudWeb.json",
          // group: regional_development
          "tasks/OutpostTrading.json",
          "tasks/SeizeDeliveryJobs.json",
-@@ -274,6 +292,7 @@
-         "tasks/AndroidOpenGame.json",
+@@ -279,6 +297,7 @@
          "tasks/CloseGame.json",
          "tasks/CloseGamePC.json",
+         "tasks/CloseGamePlayCover.json",
 +        "tasks/CloseCloudWeb.json",
          // group: realtime
          "tasks/RealTimeTask.json",
          // group: backpack
 diff --git a/assets/locales/interface/en_us.json b/assets/locales/interface/en_us.json
-index c040d21fc9ff308a69ffb03ab7a5c5f4a80c53fe..17487028e4e49c6ab1d68b8333e6fdef28dc0d69 100644
+index 5bba2b5d2e661826e81a8982662188c0d96bda83..b99746d194ef6f80db947f257ead04d1521ac4b9 100644
 --- a/assets/locales/interface/en_us.json
 +++ b/assets/locales/interface/en_us.json
 @@ -14,6 +14,8 @@
@@ -55,18 +55,20 @@ index c040d21fc9ff308a69ffb03ab7a5c5f4a80c53fe..17487028e4e49c6ab1d68b8333e6fdef
      "controller.Win32-Front.description": "Best stability. Requires the game window to remain in the foreground and unobstructed; will fully grab the mouse.",
      "controller.Win32-Front.label": "PC-Foreground",
      "controller.Win32-Window-Background.description": "Due to game updates, it can no longer be adapted. The background controller has been deprecated and will be removed in a future version.",
-@@ -1924,7 +1926,9 @@
+@@ -1950,9 +1952,11 @@
      "preset.QuickDaily.label": "Quick Daily",
      "preset.RealtimeAssist.description": "Full suite of real-time assist features for AFK.",
      "preset.RealtimeAssist.label": "Real-time Assist",
 +    "pretask.LaunchCloudWeb.label": "Log in and Start Cloud Endfield Web",
      "pretask.LaunchGamePC.label": "🚀 Launch Game (PC)",
+     "pretask.LaunchGamePlayCover.description": "Opens Endfield in PlayCover and waits for the configured interval before connecting the controller. Other tasks handle login and entering the game.",
+     "pretask.LaunchGamePlayCover.label": "🚀 Launch Game (PlayCover)",
 +    "pretask.LoginCloudWeb.label": "Log in to Cloud Endfield (removable after login)",
      "resource.CN.label": "General Resources (currently best supported in Simplified Chinese)",
      "task.AccountSwitch.description": "Automatically log out and switch to the specified account (match by phone number on CN Server, by email on Global Server)",
      "task.AccountSwitch.label": "🔑 Auto Account Switch",
 diff --git a/assets/locales/interface/ja_jp.json b/assets/locales/interface/ja_jp.json
-index 4f47cfe926b73c4bf2cf1bdef052b70c44d04ae3..c45f104ca2e7ba7a8d27afb3c7f37a9d2bfc283b 100644
+index 263ab79a84ed01c92a13a792f8d162136e119d8f..560e655ce5efa83f1459d56d0d26880ec343892d 100644
 --- a/assets/locales/interface/ja_jp.json
 +++ b/assets/locales/interface/ja_jp.json
 @@ -14,6 +14,8 @@
@@ -78,18 +80,20 @@ index 4f47cfe926b73c4bf2cf1bdef052b70c44d04ae3..c45f104ca2e7ba7a8d27afb3c7f37a9d
      "controller.Win32-Front.description": "安定性が最も高い。ゲームウィンドウを最前面に表示し、遮られないようにする必要があります。マウスを完全に占有します。",
      "controller.Win32-Front.label": "PC-前面",
      "controller.Win32-Window-Background.description": "ゲームの更新により適応を継続できなくなりました。バックグラウンドコントローラーは非推奨となり、今後のバージョンで削除される予定です。",
-@@ -1924,7 +1926,9 @@
+@@ -1950,9 +1952,11 @@
      "preset.QuickDaily.label": "クイックデイリー",
      "preset.RealtimeAssist.description": "放置時に有効にするリアルタイムアシスト機能のフルセット。",
      "preset.RealtimeAssist.label": "リアルタイムアシスト",
 +    "pretask.LaunchCloudWeb.label": "クラウド Web 版にログインして起動",
      "pretask.LaunchGamePC.label": "🚀 ゲーム起動（PC）",
+     "pretask.LaunchGamePlayCover.description": "PlayCover のエンドフィールドを起動し、指定した時間だけ待ってからコントローラーに接続します。ログインとゲームへの移行は他のタスクで行います。",
+     "pretask.LaunchGamePlayCover.label": "🚀 ゲーム起動（PlayCover）",
 +    "pretask.LoginCloudWeb.label": "クラウドエンドフィールドにログイン（ログイン後は削除可能）",
      "resource.CN.label": "共通リソース（現在は簡体字中国語のみサポートが良好）",
      "task.AccountSwitch.description": "現在のアカウントからログアウトし、指定アカウントに切り替えます（中国サーバーは電話番号、グローバルサーバーはメールアドレスで照合）",
      "task.AccountSwitch.label": "🔑自動アカウント切替",
 diff --git a/assets/locales/interface/ko_kr.json b/assets/locales/interface/ko_kr.json
-index e15a799628bcdbf0a402f29f211342c701743f70..1ac570f8e65748e7c1df921a1a648c291c9d947a 100644
+index 136334b40f5702ddf6413ec5917204fc0c7d3fd5..8962682fabeef0795098d806629d773cc3c32667 100644
 --- a/assets/locales/interface/ko_kr.json
 +++ b/assets/locales/interface/ko_kr.json
 @@ -14,6 +14,8 @@
@@ -101,18 +105,20 @@ index e15a799628bcdbf0a402f29f211342c701743f70..1ac570f8e65748e7c1df921a1a648c29
      "controller.Win32-Front.description": "안정성이 가장 뛰어납니다. 게임 창이 항상 최앞단에 있고 가려지지 않아야 하며, 마우스를 완전히 점유합니다.",
      "controller.Win32-Front.label": "PC-포그라운드",
      "controller.Win32-Window-Background.description": "게임 업데이트로 인해 더 이상 호환할 수 없습니다. 백그라운드 컨트롤러는 사용 중단되었으며 향후 버전에서 제거될 예정입니다.",
-@@ -1924,7 +1926,9 @@
+@@ -1950,9 +1952,11 @@
      "preset.QuickDaily.label": "빠른 일일 임무",
      "preset.RealtimeAssist.description": "방치 시 활성화하는 실시간 어시스트 기능 풀세트입니다.",
      "preset.RealtimeAssist.label": "실시간 어시스트",
 +    "pretask.LaunchCloudWeb.label": "클라우드 웹 버전 로그인 및 시작",
      "pretask.LaunchGamePC.label": "🚀 게임 실행 (PC)",
+     "pretask.LaunchGamePlayCover.description": "PlayCover의 엔드필드를 실행하고 지정된 시간만큼 기다린 뒤 컨트롤러에 연결합니다. 로그인과 게임 진입은 다른 작업에서 처리합니다.",
+     "pretask.LaunchGamePlayCover.label": "🚀 게임 실행 (PlayCover)",
 +    "pretask.LoginCloudWeb.label": "클라우드 엔드필드 로그인 (로그인 후 제거 가능)",
      "resource.CN.label": "공통 리소스 (현재 간체 중국어만 잘 지원됨)",
      "task.AccountSwitch.description": "현재 계정에서 로그아웃하고 지정한 계정으로 전환합니다(중국 서버는 전화번호, 글로벌 서버는 이메일로 매칭)",
      "task.AccountSwitch.label": "🔑자동 계정 전환",
 diff --git a/assets/locales/interface/zh_cn.json b/assets/locales/interface/zh_cn.json
-index 273c56b707c878c07d1ca2929fc83bf3cbf20d3e..0d06ff1ccd332e9d7499422a1ebcd78f983da461 100644
+index b368988617a884e44ba47d1dc0fb619c4e167dd5..e62c5a6f2df41f0fc7cca51a0b8061625f263a72 100644
 --- a/assets/locales/interface/zh_cn.json
 +++ b/assets/locales/interface/zh_cn.json
 @@ -14,6 +14,8 @@
@@ -124,18 +130,20 @@ index 273c56b707c878c07d1ca2929fc83bf3cbf20d3e..0d06ff1ccd332e9d7499422a1ebcd78f
      "controller.Win32-Front.description": "稳定性最好，需要游戏窗口保持在最前且不被遮挡，会完全抢占鼠标",
      "controller.Win32-Front.label": "电脑端-前台",
      "controller.Win32-Window-Background.description": "因游戏更新导致无法继续适配，后台控制器已弃用，并将在后续版本中移除。",
-@@ -1924,7 +1926,9 @@
+@@ -1950,9 +1952,11 @@
      "preset.QuickDaily.label": "快速日常",
      "preset.RealtimeAssist.description": "挂机时开启的实时辅助功能全套",
      "preset.RealtimeAssist.label": "实时辅助",
 +    "pretask.LaunchCloudWeb.label": "登录并启动云终末地网页版",
      "pretask.LaunchGamePC.label": "🚀启动游戏（PC）",
+     "pretask.LaunchGamePlayCover.description": "打开 PlayCover 中的终末地，等待指定时间后连接控制器。登录与进入游戏由其他任务处理。",
+     "pretask.LaunchGamePlayCover.label": "🚀启动游戏（PlayCover）",
 +    "pretask.LoginCloudWeb.label": "登录云终末地（登录后可移除）",
      "resource.CN.label": "通用资源（目前仅简中支持较好）",
      "task.AccountSwitch.description": "自动登出当前账号并切换到指定账号（国服按手机号、国际服按邮箱匹配）",
      "task.AccountSwitch.label": "🔑自动切换账号",
 diff --git a/assets/locales/interface/zh_tw.json b/assets/locales/interface/zh_tw.json
-index 4a760876b6c9134588ee208b991a29054348a731..0103f01713ccd9a330721b0ae8a7c3428e318a44 100644
+index 16df12fd5935c41616f987c328d6ee759116cdfc..bd691250186279d40b668c7c7b3ffa2c135d84c0 100644
 --- a/assets/locales/interface/zh_tw.json
 +++ b/assets/locales/interface/zh_tw.json
 @@ -14,6 +14,8 @@
@@ -147,12 +155,14 @@ index 4a760876b6c9134588ee208b991a29054348a731..0103f01713ccd9a330721b0ae8a7c342
      "controller.Win32-Front.description": "穩定性最好，需要遊戲視窗保持在最前且不被遮擋，會完全搶占滑鼠",
      "controller.Win32-Front.label": "電腦端-前台",
      "controller.Win32-Window-Background.description": "因遊戲更新導致無法繼續適配，後台控制器已棄用，並將在後續版本中移除。",
-@@ -1924,7 +1926,9 @@
+@@ -1950,9 +1952,11 @@
      "preset.QuickDaily.label": "快速日常",
      "preset.RealtimeAssist.description": "掛機時開啟的實時輔助功能全套",
      "preset.RealtimeAssist.label": "實時輔助",
 +    "pretask.LaunchCloudWeb.label": "登入並啟動雲終末地網頁版",
      "pretask.LaunchGamePC.label": "🚀啟動遊戲（PC）",
+     "pretask.LaunchGamePlayCover.description": "開啟 PlayCover 中的終末地，等待指定時間後連線控制器。登入與進入遊戲由其他任務處理。",
+     "pretask.LaunchGamePlayCover.label": "🚀啟動遊戲（PlayCover）",
 +    "pretask.LoginCloudWeb.label": "登入雲終末地（登入後可移除）",
      "resource.CN.label": "通用資源（目前僅簡中支援較好）",
      "task.AccountSwitch.description": "自動登出目前帳號並切換到指定帳號（國服按手機號、國際服按電子郵件匹配）",
@@ -913,7 +923,7 @@ index 0000000000000000000000000000000000000000..bc3fe29de3a615c107a1769bd2f15008
 +    }
 +}
 diff --git a/assets/tasks/AutoCollect.json b/assets/tasks/AutoCollect.json
-index 9ada253febd937d25f76c1d5ae8f25c74eaa7008..2df265f9f2f3070d32be012f550c317280371c5d 100644
+index 8ca164fcb8168ce6a5c64aa824f45fd24af48214..f4a0712f818338140ca399b11d2abc3535085391 100644
 --- a/assets/tasks/AutoCollect.json
 +++ b/assets/tasks/AutoCollect.json
 @@ -15,7 +15,8 @@
@@ -926,26 +936,6 @@ index 9ada253febd937d25f76c1d5ae8f25c74eaa7008..2df265f9f2f3070d32be012f550c3172
              ],
              "option": [
                  "AutoCollectSchedule",
-@@ -151,7 +152,8 @@
-                 "Linux-Gamescope",
-                 "Linux-ScreenCast",
-                 "Linux-Wlroots",
--                "Win32-Front"
-+                "Win32-Front",
-+                "Win32-CloudWeb"
-             ],
-             "label": "$option.AutoCollectMode.label",
-             "description": "$option.AutoCollectMode.description",
-@@ -256,7 +258,8 @@
-                 "Linux-Gamescope",
-                 "Linux-ScreenCast",
-                 "Linux-Wlroots",
--                "Win32-Front"
-+                "Win32-Front",
-+                "Win32-CloudWeb"
-             ],
-             "label": "$option.AutoCollectTargetInventory.label",
-             "description": "$option.AutoCollectTargetInventory.description",
 diff --git a/assets/tasks/AutoSell.json b/assets/tasks/AutoSell.json
 index f53451497113a8df56fd318f17cada2377217bf2..718ffea3043dfcd2758318f6175af22e01d67d68 100644
 --- a/assets/tasks/AutoSell.json
@@ -1035,7 +1025,7 @@ index 87cd4514e135f5cad170e8422dc1cd387767e932..d981f689b1e8824eccaf0e8ec96c3d59
              "option": [
                  "DailyEmailRewards",
 diff --git a/assets/tasks/DeliveryJobs.json b/assets/tasks/DeliveryJobs.json
-index 1c4aba51a2d6e8c48e6dfb3e00aa93315d344a4b..f295da3556faf5692f947998435d42c54b708806 100644
+index a0b330e93f8d71344ead5839496eac17c22e05bc..f9087bc6c928e0dc00fe75f964c0cc4014746821 100644
 --- a/assets/tasks/DeliveryJobs.json
 +++ b/assets/tasks/DeliveryJobs.json
 @@ -17,7 +17,8 @@
@@ -1049,7 +1039,7 @@ index 1c4aba51a2d6e8c48e6dfb3e00aa93315d344a4b..f295da3556faf5692f947998435d42c5
              "option": [
                  "ValleyIV",
 diff --git a/assets/tasks/DijiangRewards.json b/assets/tasks/DijiangRewards.json
-index 68fb97efda46d5cb44945c85b98e86e9d6289917..85f23d36eb2fece4d333c76a5b694f27b74f7c3d 100644
+index 5e206c816a82aefff3c3cf990aa59eb27ff9f2d2..5467adede1c51129d44a94386e4d5fe6ff5cf6c1 100644
 --- a/assets/tasks/DijiangRewards.json
 +++ b/assets/tasks/DijiangRewards.json
 @@ -17,7 +17,8 @@
@@ -1153,7 +1143,7 @@ index 40c31b24e4db98bacd69b378c09cbb22f41e2bf3..913be84506775f768911e16046e7d9bf
                  "PlayCover"
              ],
 diff --git a/assets/tasks/preset/DailyFull.json b/assets/tasks/preset/DailyFull.json
-index f40b89ad44f4132cccbb745d788164a5c3565d34..e80ee91b9fa782b19866f71408a05c11d8aea7d3 100644
+index 91f412621b570b91ffc22cca4814d63682990cd1..77a3033735ad69d14bf06e87bbc3b9b23a716b37 100644
 --- a/assets/tasks/preset/DailyFull.json
 +++ b/assets/tasks/preset/DailyFull.json
 @@ -146,6 +146,9 @@

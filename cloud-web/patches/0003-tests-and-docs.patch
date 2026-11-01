@@ -470,7 +470,7 @@ index 0000000000000000000000000000000000000000..3e2d08e65d52591947705b727ab6dd8e
 +    ]
 +}
 diff --git a/tests/scripts/loader.mts b/tests/scripts/loader.mts
-index 7a3517bcaa8faf8473dce9d684b901779e13b6b9..6fbdd69b75eca6adc6f3a500a44729484aabe019 100644
+index 31e32354e6508621a56a61a1ac1158a71a7f1dd3..32d7b8711face7ee80941d82595684d312f07a04 100644
 --- a/tests/scripts/loader.mts
 +++ b/tests/scripts/loader.mts
 @@ -1,5 +1,6 @@

@@ -5366,10 +5366,10 @@ index 01eb59f5cd5b2ea17ec8da4bb80b855869d50b29..193af74ed3a199f64faee06ecf174648
  	// Skip if we've already warned
  	if c.warned {
 diff --git a/tools/schema/custom.action.schema.json b/tools/schema/custom.action.schema.json
-index 2f78f768829f8eff38ab1a72f96512cd41a0f0d6..440e18b05f1b3ac07c357c39ad939bd16a787b93 100644
+index adf7ecda43c28f09e9936096882f8bc06be5486c..fc122484008b27dad976791783773e0fdf4f6103 100644
 --- a/tools/schema/custom.action.schema.json
 +++ b/tools/schema/custom.action.schema.json
-@@ -43,6 +43,8 @@
+@@ -44,6 +44,8 @@
                  "CaptureUid",
                  "ClearHitCount",
                  "CloseGameAction",
@@ -5378,7 +5378,7 @@ index 2f78f768829f8eff38ab1a72f96512cd41a0f0d6..440e18b05f1b3ac07c357c39ad939bd1
                  "CreditShoppingScanItemAction",
                  "DeliveryJobsResolveOngoingDepotAction",
                  "ERROR",
-@@ -99,6 +101,83 @@
+@@ -101,6 +103,83 @@
          }
      },
      "allOf": [
