@@ -1094,6 +1094,18 @@ index 5418ce144c150234d5e916225daa0ae3bf28d240..a0f04372d0555024438d5a216f5bf9e1
              ],
              "option": [
                  "ProtocolSpaceSchedule",
+diff --git a/assets/tasks/RestaurantDaily.json b/assets/tasks/RestaurantDaily.json
+index b23841387e048b2fa8c43e4b9126191d5b4d0f6f..be202f7ce17230d3818aded9c7b287fc68fbe3e3 100644
+--- a/assets/tasks/RestaurantDaily.json
++++ b/assets/tasks/RestaurantDaily.json
+@@ -10,6 +10,7 @@
+             ],
+             "controller": [
+                 "Win32-Front",
++                "Win32-CloudWeb",
+                 "Linux-Gamescope",
+                 "Linux-ScreenCast",
+                 "Linux-Wlroots"
 diff --git a/assets/tasks/SeizeDeliveryJobs.json b/assets/tasks/SeizeDeliveryJobs.json
 index 722699b8c748582e3a2fb7542678802c9fc0bf71..3072087f3f0c470d22c90addc9530fb0290939c6 100644
 --- a/assets/tasks/SeizeDeliveryJobs.json

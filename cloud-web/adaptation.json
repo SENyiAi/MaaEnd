@@ -7,8 +7,8 @@
         },
         {
             "path": "patches/0002-resources.patch",
-            "sha256": "38e0ed7514ef2fe33cc96556bc6c537fb071115196250658577458b53546f1e6",
-            "files": 43
+            "sha256": "d49b43c072fdcf3614a8830cfc2fdb51eca09f4b2cdb3654044445128a549bd9",
+            "files": 44
         },
         {
             "path": "patches/0003-tests-and-docs.patch",
